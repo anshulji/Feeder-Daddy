@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/grad_bg"
+    android:animateLayoutChanges="true"
+    tools:context=".SplashActivity">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:animateLayoutChanges="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:id="@+id/fdlogo"
+            android:animateLayoutChanges="true"
+            android:visibility="visible"
+            android:layout_centerHorizontal="true"
+            android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_centerInParent="true"
+            android:layout_height="150dp"
+            android:src="@drawable/feeder_daddy_logo"
+            />
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/signup_layout"
+            android:visibility="gone"
+            android:layout_below="@+id/fdlogo"
+            android:layout_width="wrap_content"
+            android:animateLayoutChanges="true"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:id="@+id/txtsignuphere"
+                android:fontFamily="sans-serif-medium"
+                android:text="Sign Up"
+                android:textColor="@android:color/white"
+                android:textSize="30dp"
+                />
+            <LinearLayout
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
+                android:layout_below="@+id/txtsignuphere"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Username"
+                        android:textAllCaps="true"
+                        android:textSize="15dp"
+                        android:textColor="@android:color/white"
+                        />
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:id="@+id/edtusername"
+                        android:layout_marginTop="5dp"
+                        android:fontFamily="sans-serif-light"
+                        android:paddingVertical="5dp"
+                        android:inputType="textPersonName"
+                        android:paddingHorizontal="15dp"
+                        android:textSize="20dp"
+                        android:background="@drawable/et_bg"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Phone Number"
+                        android:textAllCaps="true"
+                        android:textSize="15dp"
+                        android:textColor="@android:color/white"
+                        />
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/edtphone"
+                        android:textColor="@android:color/white"
+                        android:layout_marginTop="5dp"
+                        android:paddingVertical="5dp"
+                        android:fontFamily="sans-serif-light"
+                        android:inputType="phone"
+                        android:paddingHorizontal="15dp"
+                        android:textSize="20dp"
+                        android:background="@drawable/et_bg"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_below="@+id/line1"
+                android:layout_marginTop="50dp"
+                android:text="Send OTP"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:id="@+id/btnsendotp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingHorizontal="70dp"
+                android:layout_centerHorizontal="true"
+                android:textSize="16dp"
+                android:background="@drawable/bt_bg"
+
+                />
+
+
+        </RelativeLayout>
+
+
+
+
+    </RelativeLayout>
+</RelativeLayout>

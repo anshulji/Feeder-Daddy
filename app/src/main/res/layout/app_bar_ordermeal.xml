@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_alignParentTop="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="0dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:contentInsetStart="0dp"
+            app:contentInsetLeft="0dp"
+            android:background="@android:color/transparent"
+            app:popupTheme="@style/AppTheme.PopupOverlay" >
+
+            <com.mancj.materialsearchbar.MaterialSearchBar
+                android:layout_width="wrap_content"
+                app:mt_roundedSearchBarEnabled="true"
+                android:outlineSpotShadowColor="@android:color/transparent"
+                android:outlineAmbientShadowColor="@android:color/transparent"
+                android:foreground="@drawable/bt_bg"
+                app:mt_placeholder="Search Restaurant"
+                android:id="@+id/SearchBar"
+                app:mt_placeholderColor="@android:color/darker_gray"
+                app:mt_borderlessRippleEnabled="true"
+                android:layout_height="wrap_content">
+
+            </com.mancj.materialsearchbar.MaterialSearchBar>
+
+
+
+
+        </android.support.v7.widget.Toolbar>
+
+
+
+
+    <include layout="@layout/content_ordermeal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+
+        ></LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/ordermeal"
+        android:title="Order Meal"
+        android:icon="@drawable/ic_edit_black_24dp">
+
+    </item>
+    <item android:id="@+id/confectionaries"
+
+        android:title="Confectionaries"
+        android:icon="@drawable/ic_time">
+    </item>
+    <item android:id="@+id/eventcatering"
+
+        android:title="Event Catering"
+        android:icon="@drawable/ic_arrow_back_black_24dp">
+    </item>
+    <item android:id="@+id/orders"
+        android:title="Orders"
+        android:icon="@drawable/ic_edit_location_black_24dp">
+    </item>
+</menu>

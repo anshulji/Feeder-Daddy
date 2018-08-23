@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<android.support.v7.widget.CardView
+
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp"
+    android:layout_marginVertical="5dp"
+    android:layout_marginHorizontal="5dp"
+    app:cardPreventCornerOverlap="false"
+    android:background="@drawable/grad_red_bg"
+    android:layout_height="200dp">
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+
+            app:riv_corner_radius_top_left="12dp"
+            android:foreground="#20000000"
+            app:riv_corner_radius_top_right="12dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/grad_bg"
+            android:layout_width="match_parent"
+            android:id="@+id/imgrestaurant"
+            android:layout_height="150dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/closed_bg"
+            android:text="Closed"
+
+            android:textSize="15dp"
+            android:id="@+id/txtclosed"
+            android:visibility="gone"
+            android:textColor="@android:color/white"
+            android:padding="5dp"
+            android:backgroundTint="@android:color/holo_red_light"
+
+            />
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/ratingBarStyleSmall"
+            android:id="@+id/ratingbar"
+            android:rating="3.2"
+            android:progressTint="@android:color/holo_orange_light"
+            android:numStars="5"
+            android:layout_above="@+id/rlname"
+            android:layout_marginBottom="6dp"
+            android:layout_toRightOf="@+id/txtrating"
+            android:layout_marginLeft="5dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3.0"
+            android:layout_marginLeft="5dp"
+
+            android:layout_marginBottom="5dp"
+            android:paddingHorizontal="8dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bt_bg"
+            android:backgroundTint="@android:color/holo_red_light"
+            android:id="@+id/txtrating"
+            android:layout_above="@+id/rlname"
+            android:layout_alignParentLeft="true"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(30)"
+            android:layout_margin="5dp"
+            android:textColor="@android:color/white"
+            android:id="@+id/txttotalrates"
+            android:layout_above="@+id/rlname"
+            android:layout_toRightOf="@+id/ratingbar"
+            android:textStyle="bold"
+            />
+
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_marginBottom="5dp"
+            android:layout_height="20dp"
+            android:layout_above="@+id/rlname"
+            android:src="@drawable/ic_time"
+            android:layout_toLeftOf="@+id/txtdeliverytime"
+            android:tint="@android:color/white"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30-45"
+            android:layout_margin="5dp"
+            android:textColor="@android:color/white"
+            android:id="@+id/txtdeliverytime"
+            android:layout_above="@+id/rlname"
+            android:layout_toLeftOf="@+id/txtdeliverymin"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="min"
+
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+
+            android:textColor="@android:color/white"
+            android:id="@+id/txtdeliverymin"
+            android:layout_above="@+id/rlname"
+            android:layout_alignParentRight="true"
+            />
+
+
+
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_below="@+id/imgrestaurant"
+            android:id="@+id/rlname"
+            android:background="#99ffffff"
+            android:layout_height="60dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sha Chicken"
+                android:textSize="18dp"
+                android:id="@+id/txtxrestaurantname"
+                android:paddingLeft="10dp"
+                android:textColor="@android:color/black"
+                />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_marginTop="5dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_fiber_manual_record_black_24dp"
+                android:id="@+id/imgveg"
+                android:layout_toLeftOf="@+id/imgnonveg"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/veg_icon"
+                android:tint="@android:color/holo_green_dark"
+                />
+
+            <ImageView
+                android:id="@+id/imgnonveg"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_fiber_manual_record_black_24dp"
+                android:background="@drawable/nonveg_icon"
+                android:tint="@android:color/holo_red_dark"
+                />
+
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/txtdistance"
+                android:text="5 km"
+                android:layout_marginRight="10dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="09:00 - 22:00 "
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+
+                android:layout_alignParentBottom="true"
+                />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/txtdeliverycharge"
+                android:layout_centerInParent="true"
+                android:text="Delivery ₹40"
+                />
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+
+</android.support.v7.widget.CardView>
+</LinearLayout>
