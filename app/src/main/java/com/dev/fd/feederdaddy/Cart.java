@@ -5,19 +5,28 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dev.fd.feederdaddy.Database.Database;
+import com.dev.fd.feederdaddy.Helper.RecyclerItemTouchHelper;
+import com.dev.fd.feederdaddy.Interface.RecyclerItemTouchHelperListener;
 import com.dev.fd.feederdaddy.ViewHolder.CartAdapter;
+import com.dev.fd.feederdaddy.ViewHolder.CartViewHolder;
 import com.dev.fd.feederdaddy.model.Order;
 import com.dev.fd.feederdaddy.model.Request;
 import com.google.android.gms.common.internal.service.Common;
@@ -32,31 +41,49 @@ import java.util.Locale;
 
 import info.hoang8f.widget.FButton;
 
-public class Cart extends AppCompatActivity {
+public class Cart extends AppCompatActivity implements RecyclerItemTouchHelperListener {
 
-    RecyclerView recyclerView;
+    public static  RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
 
     FirebaseDatabase database;
     DatabaseReference requests;
 
-    TextView txtTotalPrice;
+    ImageView imggoback;
+
+    public static TextView txtTotalPrice;
     FButton btnPlace;
 
-    String phone,username;
+    String phone,username,city;
+
+    public static ConstraintLayout constraintLayout;
 
     List<Order> cart = new ArrayList<>();
-    CartAdapter adapter;
+    public static CartAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
+        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        city = sharedPreferences.getString("city","N/A");
 
+        constraintLayout = findViewById(R.id.root_layout);
+
+        imggoback = findViewById(R.id.imggoback);
+        imggoback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
 
         database= FirebaseDatabase.getInstance();
-        requests= database.getReference("Requests");
+        requests= database.getReference(city).child("Requests");
 
         //Init
         recyclerView= findViewById(R.id.listCart);
@@ -64,10 +91,13 @@ public class Cart extends AppCompatActivity {
         layoutManager= new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+        //swipe to delete
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT,this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
         txtTotalPrice= findViewById(R.id.total);
         btnPlace= findViewById(R.id.btnPlaceOrder);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
         phone = sharedPreferences.getString("phone","N/A");
         username = sharedPreferences.getString("name","N/A");
 
@@ -87,9 +117,15 @@ public class Cart extends AppCompatActivity {
                 );*/
 
                // showAlertDialog();
-                Intent intent = new Intent(Cart.this,PlaceOrder.class);
-                startActivity(intent);
-
+                int ct = new Database(Cart.this).getCountCart();
+                if(ct==0)
+                {
+                    Toast.makeText(Cart.this, "Your Cart Is Empty !", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Intent intent = new Intent(Cart.this, PlaceOrder.class);
+                    startActivity(intent);
+                }
 
 
             }
@@ -98,7 +134,7 @@ public class Cart extends AppCompatActivity {
 
     }
 
-    private void showAlertDialog() {
+    /*private void showAlertDialog() {
         AlertDialog.Builder alertdialog = new AlertDialog.Builder(Cart.this);
         alertdialog.setTitle("One more step !");
         alertdialog.setMessage("Enter your address: ");
@@ -141,9 +177,9 @@ public class Cart extends AppCompatActivity {
         alertdialog.show();
 
 
-    }
+    }*/
 
-    private void loadListFood() {
+    public void loadListFood() {
 
         cart = new Database(this).getCarts();
         adapter = new CartAdapter(cart,this);
@@ -159,5 +195,43 @@ public class Cart extends AppCompatActivity {
         txtTotalPrice.setText("₹"+total);
 
 
+    }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if(viewHolder instanceof CartViewHolder)
+        {
+            String name= ((CartAdapter)recyclerView.getAdapter()).getItem(viewHolder.getAdapterPosition()).getFoodname();
+
+            final Order deleteItem = ((CartAdapter) recyclerView.getAdapter()).getItem(viewHolder.getAdapterPosition());
+
+            final int deleteIndex = viewHolder.getAdapterPosition();
+
+            adapter.removeItem(deleteIndex);
+
+            new Database(getBaseContext()).removeFoodFromCart(deleteItem.getID());
+
+            //update total price
+            int total =0;
+            List<Order> orders = new Database(getBaseContext()).getCarts();
+            for (Order item : orders)
+                total+=(Integer.parseInt(item.getPrice()))*(Integer.parseInt(item.getQuantity()));
+
+            txtTotalPrice.setText("₹"+total);
+
+            //make snackbar
+            Snackbar snackbar = Snackbar.make(constraintLayout,name+" removed from cart!",Snackbar.LENGTH_LONG);
+
+            snackbar.show();
+
+            loadListFood();
+
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadListFood();
     }
 }

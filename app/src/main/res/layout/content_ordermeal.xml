@@ -6,12 +6,39 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".OrderMeal"
-    tools:showIn="@layout/app_bar_home">
+    tools:showIn="@layout/app_bar_ordermeal">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:nestedScrollingEnabled="true"
+        android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <com.daimajia.slider.library.SliderLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/slidermenu"
+        android:layout_marginVertical="8dp"
+        android:elevation="4dp"
+        app:pager_animation="Default"
+        />
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
+        android:layout_below="@+id/slidermenu"
         android:layout_height="match_parent"
         android:id="@+id/recycler_menu"
+        android:nestedScrollingEnabled="false"
         ></android.support.v7.widget.RecyclerView>
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Call Or Whatsapp on 8853795495"
+        android:visibility="gone"
+        android:id="@+id/txtcallorwhatsapp"
+        />
+    </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

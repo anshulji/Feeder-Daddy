@@ -2,34 +2,64 @@ package com.dev.fd.feederdaddy.model;
 
 public class Order {
 
-    private String ProductId, ProductName, Quantity, Price, Discount;
+    private String Foodid,Foodname,Quantity, Price,Image,Restaurantid,Menuid;
+    private int ID;
 
     public Order(){
 
     }
 
-    public Order(String productId, String productName, String quantity, String price, String discount) {
-        ProductId = productId;
-        ProductName = productName;
+    /*public Order(String foodid, String foodname, String quantity, String price, String image, String restaurantid, String menuid) {
+        Foodid = foodid;
+        Foodname = foodname;
         Quantity = quantity;
         Price = price;
-        Discount = discount;
+        Image = image;
+        Restaurantid = restaurantid;
+        Menuid = menuid;
+    }*/
+
+    public Order( int ID,String foodid, String foodname, String quantity, String price, String image, String restaurantid, String menuid) {
+        Foodid = foodid;
+        Foodname = foodname;
+        Quantity = quantity;
+        Price = price;
+        Image = image;
+        Restaurantid = restaurantid;
+        Menuid = menuid;
+        this.ID = ID;
     }
 
-    public String getProductId() {
-        return ProductId;
+    public String getFoodid() {
+        return Foodid;
     }
 
-    public void setProductId(String productId) {
-        ProductId = productId;
+    public void setFoodid(String foodid) {
+        Foodid = foodid;
     }
 
-    public String getProductName() {
-        return ProductName;
+    public String getMenuid() {
+        return Menuid;
     }
 
-    public void setProductName(String productName) {
-        ProductName = productName;
+    public void setMenuid(String menuid) {
+        Menuid = menuid;
+    }
+
+    public String getFoodname() {
+        return Foodname;
+    }
+
+    public void setFoodname(String foodname) {
+        Foodname = foodname;
+    }
+
+    public String getRestaurantid() {
+        return Restaurantid;
+    }
+
+    public void setRestaurantid(String restaurantid) {
+        Restaurantid = restaurantid;
     }
 
     public String getQuantity() {
@@ -48,11 +78,19 @@ public class Order {
         Price = price;
     }
 
-    public String getDiscount() {
-        return Discount;
+    public String getImage() {
+        return Image;
     }
 
-    public void setDiscount(String discount) {
-        Discount = discount;
+    public void setImage(String image) {
+        Image = image;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
     }
 }

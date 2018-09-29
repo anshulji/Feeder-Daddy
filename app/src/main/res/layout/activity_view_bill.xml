@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ViewBillActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@android:color/white"
+        android:layout_alignParentTop="true"
+        android:id="@+id/tbplaceorder"
+        android:elevation="4dp"
+        android:layout_marginBottom="4dp"
+        android:padding="10dp"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:tint="@android:color/darker_gray"
+            android:id="@+id/imggoback"
+            android:layout_height="30dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:text="Restaurant Bill"
+            />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_above="@+id/btnconfirmorder"
+        android:layout_below="@+id/tbplaceorder"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:elevation="3dp"
+                android:id="@+id/rlrestinfo"
+
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:padding="10dp"
+                    android:layout_height="150dp">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="130dp"
+                        android:scaleType="centerCrop"
+                        android:id="@+id/imgrest"
+                        android:foreground="#90000000"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Sha Chicken"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="cursive"
+                        android:id="@+id/txtrestname"
+                        android:textStyle="bold"
+                        android:textSize="25dp"
+                        android:layout_centerInParent="true"
+                        android:layout_height="wrap_content" />
+                    <!-- TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/imgrest"
+                        android:id="@+id/txtrating"
+                        android:layout_marginLeft="10dp"
+                        android:layout_below="@+id/txtrestname"
+                        android:text="4.5"
+                        android:background="@drawable/bt_bg"
+                        android:paddingHorizontal="10dp"
+                        android:layout_marginVertical="1dp"
+                        android:backgroundTint="@android:color/holo_red_light"
+                        android:textColor="@android:color/white"
+                        />
+                    <RatingBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/txtrestname"
+                        android:layout_toRightOf="@+id/txtrating"
+                        android:layout_marginLeft="5dp"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_marginVertical="2dp"
+                        android:id="@+id/ratbar"
+                        android:rating="3.2"
+                        android:progressTint="@android:color/holo_orange_light"
+                        android:numStars="5"
+                        android:layout_above="@+id/rlname"
+                        android:layout_marginBottom="6dp"
+                        / -->
+
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
+                android:id="@+id/cvbill"
+                android:layout_below="@+id/rlrestinfo"
+                android:layout_height="wrap_content">
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:padding="10dp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Restaurant Bill"
+                        android:textSize="17dp"
+                        android:textStyle="bold"
+                        android:id="@+id/txtrestbill"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:textColor="@android:color/black"
+                        />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:weightSum="4"
+                        android:id="@+id/llbillhead"
+                        app:layout_constraintTop_toBottomOf="@+id/txtrestbill"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Items"
+                            android:textColor="@android:color/black"
+                            android:textSize="15dp"
+
+                            />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:textColor="@android:color/black"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAlignment="center"
+                            android:text="Quantity"
+                            android:textSize="15dp"
+                            />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:textColor="@android:color/black"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Amount"
+                            android:textAlignment="center"
+                            android:textSize="15dp"
+                            />
+                    </LinearLayout>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        app:layout_constraintTop_toBottomOf="@+id/llbillhead"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:id="@+id/recycler_bill"
+                        android:layout_height="wrap_content">
+                    </android.support.v7.widget.RecyclerView>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:weightSum="4"
+                        android:id="@+id/lldeliverycharge"
+                        android:layout_height="wrap_content"
+
+                        app:layout_constraintTop_toBottomOf="@+id/recycler_bill"
+                        >
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="Delivery Charges"
+                            android:textSize="15dp"
+                            />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Rs. 40"
+                            android:id="@+id/txtdeliverycharge"
+                            android:textAlignment="center"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_marginVertical="5dp"
+
+
+                        app:layout_constraintTop_toBottomOf="@+id/lldeliverycharge"
+                        android:id="@+id/line"
+                        android:background="@android:color/darker_gray"
+                        android:layout_height="2dp"
+                        android:orientation="horizontal" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:weightSum="4"
+                        android:layout_height="wrap_content"
+
+                        app:layout_constraintTop_toBottomOf="@+id/line"
+
+                        >
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="Total Amount "
+                            android:textColor="@android:color/secondary_text_light"
+                            android:textStyle="bold"
+                            android:textSize="15dp"
+                            />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Rs. 540"
+                            android:textStyle="bold"
+                            android:id="@+id/txttotalamount"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/secondary_text_light"
+                            />
+                    </LinearLayout>
+
+
+                </android.support.constraint.ConstraintLayout>
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:id="@+id/cvaddress"
+                android:elevation="4dp"
+                android:layout_marginVertical="5dp"
+                android:layout_below="@+id/cvbill"
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:padding="10dp"
+
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/ic_place_black_24dp"
+                        android:tint="@android:color/holo_red_light"
+                        android:id="@+id/imgaddresslogo"
+                        android:layout_gravity="center"
+                        />
+                    <TextView
+                        android:layout_margin="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_toRightOf="@+id/imgaddresslogo"
+                        android:layout_toLeftOf="@+id/imgeditaddress"
+                        android:id="@+id/txtaddress"
+                        android:layout_height="wrap_content"
+                        android:text="271, Visvesaray Hostel, IIT BHU, Varanasi, India"
+                        />
+
+                </RelativeLayout>
+
+
+            </android.support.v7.widget.CardView>
+
+
+        </RelativeLayout>
+    </ScrollView>
+
+
+
+
+
+</RelativeLayout>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FeedbackActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/tbfeedback"
+        android:elevation="4dp"
+        android:layout_marginBottom="4dp"
+        android:padding="10dp"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:tint="@android:color/darker_gray"
+            android:id="@+id/imggoback"
+            android:layout_height="30dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:text="Feedback"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbfeedback"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="Feeder Daddy"
+            android:textSize="25dp"
+            android:layout_margin="10dp"
+            android:textStyle="bold"
+            android:id="@+id/txtfeederdaddy"
+            />
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_below="@+id/txtfeederdaddy"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/imgfd"
+            android:src="@drawable/feeder_daddy_logo"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:minHeight="150dp"
+            android:hint="Type your feedback here..."
+            android:layout_below="@+id/imgfd"
+            android:background="@drawable/rectangle_bg"
+            android:id="@+id/etfeedback"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_below="@+id/etfeedback"
+            android:layout_centerHorizontal="true"
+            android:text="Submit"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/bt_bg"
+            android:textSize="15dp"
+            android:id="@+id/btnsubmitfeedback"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_phone_black_24dp"
+            android:layout_toLeftOf="@+id/txtcontactus"
+            android:layout_below="@+id/btnsubmitfeedback"
+            android:layout_marginTop="20dp"
+
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:textSize="17dp"
+            android:id="@+id/txtcontactus"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnsubmitfeedback"
+            android:text="Contact : 8853795495 "
+            />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

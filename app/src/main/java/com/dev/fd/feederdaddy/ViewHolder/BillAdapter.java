@@ -89,7 +89,7 @@ public class BillAdapter extends RecyclerView.Adapter<BillViewHolder>{
     public void onBindViewHolder(@NonNull final BillViewHolder billViewHolder, final int i) {
 
        //txtfooditemname
-        billViewHolder.txtfooditemname.setText(listData.get(i).getProductName());
+        billViewHolder.txtfooditemname.setText(listData.get(i).getFoodname());
         billViewHolder.txtfooditemqty.setText(listData.get(i).getQuantity());
 
         billViewHolder.txtfooditemtotalcost.setText("₹"+Integer.parseInt(listData.get(i).getPrice())*Integer.parseInt(listData.get(i).getQuantity()));

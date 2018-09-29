@@ -9,5 +9,8 @@
 
     <color name="overlaybackground">#7f333639</color>
     <color name="overlayActionbar">#0e0d0e</color>
+    <color name="gray">@android:color/darker_gray</color>
+    <color name="green">@android:color/holo_green_dark</color>
 
+    <color name="bgRowBackground">#FA315B</color>
 </resources>

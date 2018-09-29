@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.dev.fd.feederdaddy.Common.Common;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,8 +33,6 @@ public class SplashActivity extends AppCompatActivity {
     EditText edtusername,edtphone;
     private FirebaseAuth mAuth;
 
-
-
     //Handler handler = new Handler();
     /*Runnable runnable = new Runnable() {
         @Override
@@ -41,6 +40,9 @@ public class SplashActivity extends AppCompatActivity {
             logo.setVisibility(View.VISIBLE);
         }
     };*/
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,7 @@ public class SplashActivity extends AppCompatActivity {
         /* New Handler to start the Menus-Activity
          * and close this Splash-Screen after some seconds.*/
         mAuth=FirebaseAuth.getInstance();
-        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
         final String phone = sharedPreferences.getString("phone","N/A");
 
         if(!phone.equals("N/A"))
@@ -76,9 +78,36 @@ public class SplashActivity extends AppCompatActivity {
                 else {
 
                 /* Create an Intent that will start the Menus-Activity. */
-                Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
-                startActivity(mainIntent);
-                finish();
+                    if(!Common.isConnectedToInternet(getBaseContext()))
+                    {
+                        Toast.makeText(SplashActivity.this, "Please Check Your Internet Connection !", Toast.LENGTH_LONG).show();
+                    }
+
+                    String city  = sharedPreferences.getString("city","N/A");
+
+                    /*firebaseDatabase = FirebaseDatabase.getInstance();
+                    databaseReference = firebaseDatabase.getReference(city).child("Restaurant");
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
+                            startActivity(mainIntent);
+                            finish();
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    */
+
+                    Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
+                    startActivity(mainIntent);
+                    finish();
+
 
                 }
             }
@@ -105,8 +134,6 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     @Override

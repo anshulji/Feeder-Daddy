@@ -6,7 +6,10 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -16,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,21 +28,31 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.daimajia.slider.library.Animations.DescriptionAnimation;
+import com.daimajia.slider.library.SliderLayout;
+import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.daimajia.slider.library.SliderTypes.TextSliderView;
+import com.dev.fd.feederdaddy.Common.Common;
 import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.R;
 import com.dev.fd.feederdaddy.ViewHolder.MenuViewHolder;
 import com.dev.fd.feederdaddy.ViewHolder.RestaurantAdapter;
 import com.dev.fd.feederdaddy.ViewHolder.RestaurantViewHolder;
 import com.dev.fd.feederdaddy.model.Restaurant;
+import com.dev.fd.feederdaddy.model.RestaurantBanner;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,6 +66,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 public class OrderMeal extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
@@ -76,14 +91,23 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
     ProgressBar progressBar;
 
+    String isbakerystr,city;
+
     SharedPreferences sharedPreferences;
     public static String phone,userlatitude,userlongitude,deliverycharges;
+
+    //slider
+    HashMap<String, String> image_list;
+    SliderLayout sliderLayout;
+    String strbannername, strbannerimageurl;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.activity_order_meal, null);
+
         setHasOptionsMenu(true);
         return root;
     }
@@ -92,42 +116,50 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        sharedPreferences = this.getActivity().getSharedPreferences("MyData", Context.MODE_PRIVATE);
+
+        city = sharedPreferences.getString("city","N/A");
+
+        ConnectivityManager cm =
+                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        TextView txtcallorwhatsapp = view.findViewById(R.id.txtcallorwhatsapp);
+        progressBar = view.findViewById(R.id.progressbar);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.sortby_menu);
 
-        progressBar=view.findViewById(R.id.progressbar);
-
-
-        BottomNavigationView bottomNavigationView =view.findViewById(R.id.bottomnavigationview);
-
-
-
-
-        //init firebase
-        database = FirebaseDatabase.getInstance();
-
-
-
-
-
-        restaurant = database.getReference("Restaurant");
-
-        sharedPreferences = this.getActivity().getSharedPreferences("MyData", Context.MODE_PRIVATE);
-        phone = sharedPreferences.getString("phone","N/A");
-        userlatitude = sharedPreferences.getString("latitude","0.0");
-        userlongitude = sharedPreferences.getString("longitude","0.0");
-
-
-
-        //setSupportActionBar(toolbar);
-
-
         drawer = (DrawerLayout) view.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this.getActivity(), drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this.getActivity(), drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                ((MainActivity) getActivity()).hidebottomnavigationbar();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                ((MainActivity) getActivity()).showbottomnavigationbar();
+
+            }
+        };
+
+
         drawer.addDrawerListener(toggle);
+
         toggle.syncState();
+        {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                ((MainActivity) getActivity()).hidebottomnavigationbar();
+            }
+        }
 
         NavigationView navigationView = (NavigationView) view.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -135,28 +167,308 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         //set name for user
         View headerview = navigationView.getHeaderView(0);
 
-        // load menu
-        recylermenu =  view.findViewById(R.id.recycler_menu);
-        recylermenu.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this.getActivity());
-        recylermenu.setLayoutManager(layoutManager);
 
-        //loadRestaurants();
+        if(isConnected) {
+
+            if (Common.currentfragment.equals("bakery"))
+                isbakerystr = "1";
+            else
+                isbakerystr = "0";
+
+            txtcallorwhatsapp.setVisibility(View.GONE);
+
+            //init firebase
+            database = FirebaseDatabase.getInstance();
+            restaurant = database.getReference(city).child("Restaurant");
 
 
-        //regiuster service
-        //Intent i = new Intent(Home.this,ListenOrder.class);
-        //startService(i);
+            phone = sharedPreferences.getString("phone", "N/A");
+            userlatitude = sharedPreferences.getString("latitude", "0.0");
+            userlongitude = sharedPreferences.getString("longitude", "0.0");
 
-        refdelivercharges = database.getReference("DeliveryCharges");
-        refdelivercharges.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            //setSupportActionBar(toolbar);
+
+
+            // load menu
+            recylermenu = view.findViewById(R.id.recycler_menu);
+            recylermenu.setHasFixedSize(true);
+            layoutManager = new LinearLayoutManager(this.getActivity());
+            recylermenu.setLayoutManager(layoutManager);
+            LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(recylermenu.getContext(),
+                    R.anim.layout_slide_right);
+            recylermenu.setLayoutAnimation(controller);
+
+            //loadRestaurants();
+
+
+            //regiuster service
+            //Intent i = new Intent(Home.this,ListenOrder.class);
+            //startService(i);
+
+            refdelivercharges = database.getReference(city).child("DeliveryCharges");
+            refdelivercharges.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    deliverycharges = dataSnapshot.getValue().toString();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("deliveryrate",deliverycharges);
+                    editor.commit();
+
+                    //loadRestaurantlist();
+
+
+                    //load restlist
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.VISIBLE);
+                    }
+
+
+                    restaurant.orderByChild("isbakery").equalTo(isbakerystr).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                Restaurant res = postSnapshot.getValue(Restaurant.class);
+                                restaurantList.add(res);
+                                //HotDealsList.add(Integer.parseInt(postSnapshot.getKey()),res);
+                            }
+                            restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
+                            //recylermenu.setAdapter(restaurantAdapter);
+
+                            if (progressBar != null) {
+                                progressBar.setVisibility(View.GONE);
+                            }
+
+                            loadAnimation();
+
+                            loadSuggest();
+
+                            materialSearchBar.setLastSuggestions(SuggestList);
+                            materialSearchBar.setCardViewElevation(10);
+                            materialSearchBar.addTextChangeListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    List<String> suggest = new ArrayList<>();
+                                    for (String search : SuggestList) {
+                                        if (search.toLowerCase().contains(materialSearchBar.getText().toLowerCase())) {
+                                            suggest.add(search);
+                                        }
+                                    }
+                                    materialSearchBar.setLastSuggestions(suggest);
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+
+                                }
+                            });
+                            materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+                                @Override
+                                public void onSearchStateChanged(boolean enabled) {
+                                    //when search bar is close
+                                    //restore original adapter
+                                    if (!enabled) {
+                                        recylermenu.setAdapter(restaurantAdapter);
+                                    }
+                                }
+
+                                @Override
+                                public void onSearchConfirmed(CharSequence text) {
+                                    //when search finish
+                                    //show result of search adapter
+                                    startSearch(text);
+                                }
+
+                                @Override
+                                public void onButtonClicked(int buttonCode) {
+
+                                }
+                            });
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+
+                    //search bar
+                    materialSearchBar = view.findViewById(R.id.SearchBar);
+                    materialSearchBar.setHint("Enter Restaurant Name");
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+
+                    int id = item.getItemId();
+
+                    //noinspection SimplifiableIfStatement
+                    if (id == R.id.rating) {
+                        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+
+                            @Override
+                            public int compare(Restaurant r1, Restaurant r2) {
+
+                                return (r2.getRating()).compareTo(r1.getRating());
+                            }
+                        });
+
+                        restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
+                        recylermenu.setAdapter(restaurantAdapter);
+                        return true;
+                    }
+                    if (id == R.id.alpha) {
+                        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+
+                            @Override
+                            public int compare(Restaurant r1, Restaurant r2) {
+
+                                return (r1.getName()).compareTo(r2.getName());
+                            }
+                        });
+
+                        restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
+                        recylermenu.setAdapter(restaurantAdapter);
+                        return true;
+                    }
+                    if (id == R.id.nearest) {
+                        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+
+                            @Override
+                            public int compare(Restaurant r1, Restaurant r2) {
+
+                                Double distance1 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r1.getLatitude()), Double.parseDouble(r1.getLongitude()));
+                                Double distance2 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r2.getLatitude()), Double.parseDouble(r2.getLongitude()));
+                                String dist1 = String.format("%.2f", distance1);
+                                String dist2 = String.format("%.2f", distance2);
+
+                                return (dist1).compareTo(dist2);
+                            }
+                        });
+
+                        restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
+                        recylermenu.setAdapter(restaurantAdapter);
+                        return true;
+                    }
+                    if(id == R.id.pureveg)
+                    {
+                        List<Restaurant> vegrestlist = new ArrayList<>();
+                        for (int i = 0; i < restaurantList.size(); i++) {
+
+                            if(restaurantList.get(i).getNonveg().equals("0"))
+                            {
+                                vegrestlist.add(restaurantList.get(i));
+                            }
+                        }
+
+                        restaurantAdapter = new RestaurantAdapter(vegrestlist, OrderMeal.this.getActivity());
+                        recylermenu.setAdapter(restaurantAdapter);
+                        return true;
+                    }
+                    /*if (id == R.id.deliverycost) {
+                        Collections.sort(HotDealsList, new Comparator<Restaurant>() {
+
+                            @Override
+                            public int compare(Restaurant r1, Restaurant r2) {
+
+                                Double distance1 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r1.getLatitude()), Double.parseDouble(r1.getLongitude()));
+                                Double distance2 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r2.getLatitude()), Double.parseDouble(r2.getLongitude()));
+                                String dist1 = String.format("%.2f", distance1);
+                                String dist2 = String.format("%.2f", distance2);
+
+                                return (dist1).compareTo(dist2);
+                            }
+                        });
+
+                        restaurantAdapter = new RestaurantAdapter(HotDealsList, OrderMeal.this.getActivity());
+                        recylermenu.setAdapter(restaurantAdapter);
+                        return true;
+                    }*/
+
+                    return true;
+                }
+            });
+
+            ((MainActivity) getActivity()).bottomNavigationView.setTranslationY(0);
+
+
+            sliderLayout = view.findViewById(R.id.slidermenu);
+            sliderLayout.setVisibility(View.INVISIBLE);
+            setupSlider();
+
+
+
+        }
+        else
+        {
+            progressBar.setVisibility(View.GONE);
+            txtcallorwhatsapp.setVisibility(View.VISIBLE);
+
+
+            Toast.makeText(getActivity(), "Please Check Your Internet !", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+
+    private void setupSlider() {
+        image_list = new HashMap<>();
+
+        DatabaseReference menubannerref = database.getReference(city).child("FeederDaddyBanner");
+
+        menubannerref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                deliverycharges = dataSnapshot.getValue().toString();
-                loadRestaurantlist();
-                //search bar
-                materialSearchBar = view.findViewById(R.id.SearchBar);
-                materialSearchBar.setHint("Enter Restaurant Name");
+
+                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
+                {
+                    strbannername = postSnapshot.child("name").getValue().toString();
+                    strbannerimageurl = postSnapshot.child("image").getValue().toString();
+                    // we will concat string name and id
+                    image_list.put(strbannername,strbannerimageurl);
+
+                }
+
+                for (String key: image_list.keySet())
+                {
+                    String[] keySplit = key.split("@#@");
+                    String nameoffood = keySplit[0];
+
+                    //create slider
+                    TextSliderView textSliderView =new TextSliderView(getActivity());
+                    textSliderView.description(nameoffood)
+                            .image(image_list.get(key))
+                            .setScaleType(BaseSliderView.ScaleType.CenterCrop);
+
+                    sliderLayout.addSlider(textSliderView);
+
+
+                }
+
+                new Handler().postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        sliderLayout.setVisibility(View.VISIBLE);
+                    }
+                }, 1000);
 
 
             }
@@ -167,89 +479,15 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             }
         });
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-
-                int id = item.getItemId();
-
-                //noinspection SimplifiableIfStatement
-                if (id == R.id.rating) {
-                    Collections.sort(restaurantList, new Comparator<Restaurant>() {
-
-                        @Override
-                        public int compare(Restaurant r1, Restaurant r2) {
-
-                            return (r2.getRating()).compareTo(r1.getRating());
-                        }
-                    });
-
-                    restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
-                    recylermenu.setAdapter(restaurantAdapter);
-                    return true;
-                }
-                if (id == R.id.alpha) {
-                    Collections.sort(restaurantList, new Comparator<Restaurant>() {
-
-                        @Override
-                        public int compare(Restaurant r1, Restaurant r2) {
-
-                            return (r1.getName()).compareTo(r2.getName());
-                        }
-                    });
-
-                    restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
-                    recylermenu.setAdapter(restaurantAdapter);
-                    return true;
-                }
-                if (id == R.id.nearest) {
-                    Collections.sort(restaurantList, new Comparator<Restaurant>() {
-
-                        @Override
-                        public int compare(Restaurant r1, Restaurant r2) {
-
-                            Double distance1 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude),Double.parseDouble(userlongitude),Double.parseDouble(r1.getLatitude()),Double.parseDouble(r1.getLongitude()));
-                            Double distance2 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude),Double.parseDouble(userlongitude),Double.parseDouble(r2.getLatitude()),Double.parseDouble(r2.getLongitude()));
-                            String dist1 = String.format("%.2f",distance1);
-                            String dist2 = String.format("%.2f",distance2);
-
-                            return (dist1).compareTo(dist2);
-                        }
-                    });
-
-                    restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
-                    recylermenu.setAdapter(restaurantAdapter);
-                    return true;
-                }
-                if (id == R.id.deliverycost) {
-                    Collections.sort(restaurantList, new Comparator<Restaurant>() {
-
-                        @Override
-                        public int compare(Restaurant r1, Restaurant r2) {
-
-                            Double distance1 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude),Double.parseDouble(userlongitude),Double.parseDouble(r1.getLatitude()),Double.parseDouble(r1.getLongitude()));
-                            Double distance2 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude),Double.parseDouble(userlongitude),Double.parseDouble(r2.getLatitude()),Double.parseDouble(r2.getLongitude()));
-                            String dist1 = String.format("%.2f",distance1);
-                            String dist2 = String.format("%.2f",distance2);
-
-                            return (dist1).compareTo(dist2);
-                        }
-                    });
-
-                    restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
-                    recylermenu.setAdapter(restaurantAdapter);
-                    return true;
-                }
-
-                return true;
-            }
-        });
-
+        //sliderLayout.setPresetTransformer(SliderLayout.Transformer.Background2Foreground);
+        sliderLayout.setPresetIndicator(SliderLayout.PresetIndicators.Right_Bottom);
+        sliderLayout.setCustomAnimation(new DescriptionAnimation());
+        sliderLayout.setDuration(4000);
 
 
 
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -280,7 +518,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
 
 
-        restaurant = database.getReference("Restaurant");
+        NightOrdersRef = database.getReference("Restaurant");
 
         sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
         phone = sharedPreferences.getString("phone","N/A");
@@ -355,11 +593,18 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                     searchedList.add(res);
                 }
                 searchAdapter = new RestaurantAdapter(searchedList,OrderMeal.this.getActivity());
-                recylermenu.setAdapter(searchAdapter);
+                //recylermenu.setAdapter(searchAdapter);
 
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
+
+                recylermenu.setAdapter(searchAdapter);
+//                animation
+//                recylermenu.getAdapter().notifyDataSetChanged();
+//                recylermenu.scheduleLayoutAnimation();
+
+
 
             }
 
@@ -370,6 +615,14 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         });
 
 
+    }
+
+    private void loadAnimation() {
+
+        recylermenu.setAdapter(restaurantAdapter);
+        //animation
+        recylermenu.getAdapter().notifyDataSetChanged();
+        recylermenu.scheduleLayoutAnimation();
     }
 
     private void loadSuggest() {
@@ -384,14 +637,14 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        restaurant.addListenerForSingleValueEvent(new ValueEventListener() {
+        restaurant.orderByChild("isbakery").equalTo(isbakerystr).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
                 {
                     Restaurant res = postSnapshot.getValue(Restaurant.class);
                     restaurantList.add(res);
-                    //restaurantList.add(Integer.parseInt(postSnapshot.getKey()),res);
+                    //HotDealsList.add(Integer.parseInt(postSnapshot.getKey()),res);
                 }
                 restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
                 recylermenu.setAdapter(restaurantAdapter);
@@ -465,8 +718,8 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     }
 
    /* private void loadRestaurants() {
-        Query query = restaurant.orderByChild("name"); // or ...orderByChild("username");
-        adapter = new FirebaseRecyclerAdapter<Restaurant, RestaurantViewHolder>(Restaurant.class,R.layout.restaurant_item,RestaurantViewHolder.class,restaurant) {
+        Query query = NightOrdersRef.orderByChild("name"); // or ...orderByChild("username");
+        adapter = new FirebaseRecyclerAdapter<Restaurant, RestaurantViewHolder>(Restaurant.class,R.layout.restaurant_item,RestaurantViewHolder.class,NightOrdersRef) {
             @Override
             protected void populateViewHolder(RestaurantViewHolder viewHolder, Restaurant model, int position) {
                 //txtrestaurantname
@@ -646,8 +899,8 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             recylermenu.setAdapter(restaurantAdapter);
             return true;
         }
-        if (id == R.id.deliverycost) {
-            Collections.sort(restaurantList, new Comparator<Restaurant>() {
+        /*if (id == R.id.deliverycost) {
+            Collections.sort(HotDealsList, new Comparator<Restaurant>() {
 
                 @Override
                 public int compare(Restaurant r1, Restaurant r2) {
@@ -661,10 +914,10 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                 }
             });
 
-            restaurantAdapter = new RestaurantAdapter(restaurantList,OrderMeal.this.getActivity());
+            restaurantAdapter = new RestaurantAdapter(HotDealsList,OrderMeal.this.getActivity());
             recylermenu.setAdapter(restaurantAdapter);
             return true;
-        }
+        }*/
 
 
 
@@ -695,8 +948,9 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_menu) {
-            // Handle the camera action
+        if (id == R.id.nav_profile) {
+            Intent i = new Intent(OrderMeal.this.getActivity(),ProfileActivity.class);
+            startActivity(i);
         } else if (id == R.id.nav_cart) {
              Intent i = new Intent(OrderMeal.this.getActivity(),Cart.class);
              startActivity(i);
@@ -704,12 +958,28 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
               Intent i = new Intent(OrderMeal.this.getActivity(),Orders.class);
              startActivity(i);
 
-        } else if (id == R.id.nav_log_out) {
-            //Intent i = new Intent(MainActivity.this,SignIn.class);
+        } else if (id == R.id.feedback) {
+            Intent i = new Intent(getActivity(),FeedbackActivity.class);
             //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //startActivity(i);
+            startActivity(i);
         }
         drawer.closeDrawer(GravityCompat.START);
+
         return true;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(recylermenu!=null && recylermenu.getAdapter()!=null) {
+            recylermenu.getAdapter().notifyDataSetChanged();
+            recylermenu.scheduleLayoutAnimation();
+        }
+    }
+
+
+
+
+
+
 }

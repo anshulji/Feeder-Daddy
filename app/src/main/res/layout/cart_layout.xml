@@ -3,62 +3,127 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:paddingVertical="8dp"
+    android:paddingVertical="2dp"
     >
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
+        android:elevation="4dp"
+        android:layout_marginVertical="1dp"
         android:layout_height="wrap_content">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/view_background"
+            android:layout_margin="3dp"
+            android:background="@color/bgRowBackground"
+            android:layout_height="match_parent">
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center_vertical"
-        >
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="9"
-            android:orientation="vertical"
-            android:layout_height="wrap_content">
-
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_delete_black_24dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/delete_icon"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Food 01"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:id="@+id/cart_item_name"
-                android:layout_marginLeft="10dp"
-                android:gravity="center_vertical|start"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/delete_icon"
+                android:text="Delete"
+                android:layout_marginRight="10dp"
+                android:textColor="@android:color/white"
+                android:textSize="13dp"
+
                 />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="100,000"
-                android:textStyle="italic"
-                android:textAllCaps="true"
-                android:id="@+id/cart_item_price"
-                android:layout_marginLeft="10dp"
-                android:gravity="center_vertical|start"
-                />
-        </LinearLayout>
-        
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_vertical|end"
-            android:id="@+id/cart_item_count"
-            android:layout_marginRight="16dp"
-            />
+        </RelativeLayout>
 
-    </LinearLayout>
-</RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:background="@android:color/white"
+            android:id="@+id/view_foreground"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="90dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_vertical"
+                >
+
+                <ImageView
+                    android:layout_width="90dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
+                    android:src="@drawable/grad_bg"
+                    android:id="@+id/food_image"
+                    android:layout_height="90dp" />
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_toLeftOf="@+id/rll"
+                    android:layout_toRightOf="@+id/food_image"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+                        android:text="Food 01"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:id="@+id/cart_item_name"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="center_vertical|start"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100,000"
+                        android:textStyle="italic"
+                        android:textAllCaps="true"
+                        android:textSize="15dp"
+                        android:textColor="@android:color/black"
+                        android:id="@+id/cart_item_price"
+                        android:layout_marginLeft="10dp"
+                        android:layout_alignParentBottom="true"
+                        />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="70dp"
+                    android:id="@+id/rll"
+                    android:layout_alignParentRight="true"
+                    android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_remove_shopping_cart_black_24dp"
+                    android:layout_gravity="right"
+                    android:id="@+id/imgremovefoodfromcart"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:tint="@android:color/holo_red_light"
+                    />
+
+                <com.cepheuen.elegantnumberbutton.view.ElegantNumberButton
+                    android:id="@+id/btn_quantity"
+                    android:layout_width="70dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="bottom"
+                    app:backGroundColor="#1e90ff"
+                    app:finalNumber="20"
+                    app:initialNumber="1"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    app:textSize="7dp" />
+                </RelativeLayout>
+
+            </RelativeLayout>
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

@@ -154,6 +154,8 @@
                 android:layout_width="18dp"
                 android:layout_marginTop="5dp"
                 android:layout_height="18dp"
+                android:padding="1dp"
+
                 android:src="@drawable/ic_fiber_manual_record_black_24dp"
                 android:id="@+id/imgveg"
                 android:layout_toLeftOf="@+id/imgnonveg"
@@ -167,6 +169,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_width="18dp"
+                android:padding="1dp"
                 android:layout_height="18dp"
                 android:src="@drawable/ic_fiber_manual_record_black_24dp"
                 android:background="@drawable/nonveg_icon"
@@ -189,6 +192,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="09:00 - 22:00 "
+                android:id="@+id/txtopentime"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="10dp"
 

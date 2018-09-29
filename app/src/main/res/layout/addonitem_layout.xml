@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_margin="8dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgplay"
+            android:layout_centerVertical="true"
+            android:tint="@android:color/darker_gray"
+            android:src="@drawable/ic_play_arrow_black_24dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hazy Hazelnut"
+            android:layout_toRightOf="@+id/imgplay"
+            android:textSize="15dp"
+            android:layout_centerVertical="true"
+            android:textColor="@android:color/black"
+            android:id="@+id/txtaddonitemname"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtaddonitemprice"
+            android:layout_toLeftOf="@+id/cbaddonitem"
+            android:layout_centerVertical="true"
+            android:text="Rs.30"
+            android:textColor="@android:color/black"
+            android:textSize="13dp"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:id="@+id/cbaddonitem"
+            />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

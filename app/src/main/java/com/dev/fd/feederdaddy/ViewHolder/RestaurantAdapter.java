@@ -2,14 +2,17 @@ package com.dev.fd.feederdaddy.ViewHolder;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +20,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.dev.fd.feederdaddy.Database.Database;
 import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.MenuActivity;
 import com.dev.fd.feederdaddy.OrderMeal;
 import com.dev.fd.feederdaddy.R;
+import com.dev.fd.feederdaddy.SignUpActivity;
 import com.dev.fd.feederdaddy.model.Order;
 import com.dev.fd.feederdaddy.model.Restaurant;
 import com.squareup.picasso.Picasso;
@@ -37,7 +43,7 @@ import static com.dev.fd.feederdaddy.OrderMeal.userlongitude;
 
 class RestViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-    public TextView txtrestaurantname,txtrating,txtdistance,txttotalrates,txtdeliverytime,txtdelivercharge,txtclosed;
+    public TextView txtrestaurantname,txtrating,txtdistance,txttotalrates,txtdeliverytime,txtdelivercharge,txtclosed,txtopentime;
     public ImageView imgveg,imgnonveg,imgresaturant;
     public RatingBar ratingBar;
 
@@ -52,6 +58,7 @@ class RestViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
         txtdelivercharge = itemView.findViewById(R.id.txtdeliverycharge);
         ratingBar =itemView.findViewById(R.id.ratingbar);
         txtclosed = itemView.findViewById(R.id.txtclosed);
+        txtopentime = itemView.findViewById(R.id.txtopentime);
 
         txtdistance = itemView.findViewById(R.id.txtdistance);
         txtrating = itemView.findViewById(R.id.txtrating);
@@ -112,7 +119,9 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
             restViewHolder.imgnonveg.setVisibility(View.GONE);
 
         //txt rating
-        restViewHolder.txtrating.setText(listData.get(i).getRating());
+        Double drating = Double.parseDouble(listData.get(i).getRating());
+        String rat = String.format("%.1f",drating);
+        restViewHolder.txtrating.setText(rat);
 
         //rating bar
         restViewHolder.ratingBar.setRating(Float.parseFloat(listData.get(i).getRating()));
@@ -125,7 +134,14 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         //txt delivery rate
 
         Double rate = Double.parseDouble(deliverycharges);
-        Double charge = distance*rate;
+        Double charge;
+        if(distance<4.0)
+        {
+            charge = 20.0;
+        }
+        else {
+            charge = distance * rate;
+        }
         String dc = String.format("%.0f",charge);
         restViewHolder.txtdelivercharge.setText("Delivery ₹"+dc);
 
@@ -138,6 +154,9 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         time+=15.0;
         String timestr1 = String.format("%.0f",time);
         restViewHolder.txtdeliverytime.setText(timestr+"-"+timestr1);
+
+        //txtopentime
+        restViewHolder.txtopentime.setText(listData.get(i).getOpentime());
 
         //set open or close
         if(listData.get(i).getIsopen().equals("0"))
@@ -167,34 +186,71 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
             public void onClick(View view, int position, boolean isLongClick) {
                 // Toast.makeText(Home.this, ""+clickitem.getName(), Toast.LENGTH_SHORT).show();
                 //get category id and send to foodlist activity
+                int ct = new Database(context).getCountCart();
+                final SharedPreferences sharedPreferences = context.getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                String resid = sharedPreferences.getString("restaurantid","N/A");
+                if(listData.get(i).getIsopen().equals("0"))
+                {
+                    Toast.makeText(context, "This Restaurant is closed currently !", Toast.LENGTH_SHORT).show();
+                }
+                else if (ct!=0 && !resid.equals("N/A") && !listData.get(i).getId().equals(resid))
+                {
+                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context,R.style.MyDialogTheme);
+                    alertDialogBuilder.setTitle("Empty Your Cart");
+                    alertDialogBuilder.setMessage("You already have some items from other restaurant in your cart. Do you wish to empty your cart?");
+                    alertDialogBuilder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int in) {
+                            new Database(context).cleanCart();
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("restaurantid",listData.get(i).getId());
+                            editor.putString("deliveryrate",deliverycharges);
+                            editor.commit();
 
-                SharedPreferences sharedPreferences = context.getSharedPreferences("MyData", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("restaurantname",listData.get(i).getName() );
-                editor.putString("restaurantrating",listData.get(i).getRating() );
-                editor.putString("restaurantimage",listData.get(i).getImage());
-                //txt delivery rate
+                            Intent foodlist = new Intent(context, MenuActivity.class);
+                            foodlist.putExtra("RestaurantId", listData.get(i).getId());
+                            context.startActivity(foodlist);
 
-                Double rate = Double.parseDouble(deliverycharges);
-                Double charge = distance*rate;
-                String dc = String.format("%.0f",charge);
-                //restViewHolder.txtdelivercharge.setText("Delivery ₹"+dc);
-                editor.putString("deliverycharge",dc);
+                        }
+                    });
+                    alertDialogBuilder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+                    alertDialogBuilder.show();
+                }
+                else {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("restaurantid",listData.get(i).getId());
+                    editor.putString("deliveryrate",deliverycharges);
+                    //editor.putString("restaurantname", listData.get(i).getName());
+                    //editor.putString("restaurantrating", listData.get(i).getRating());
+                    //editor.putString("restaurantimage", listData.get(i).getImage());
+                    //txt delivery rate
 
-                //txt delivery time
-                Double time = 20.0+ (distance/0.2);
-                String timestr = String.format("%.0f",time);
-                time+=15.0;
-                String timestr1 = String.format("%.0f",time);
-                //restViewHolder.txtdeliverytime.setText(timestr+"-"+timestr1);
-                editor.putString("deliverytime",timestr+"-"+timestr1);
+                    //Double rate = Double.parseDouble(deliverycharges);
+                    //Double charge = distance * rate;
+                    //String dc = String.format("%.0f", charge);
+                    //restViewHolder.txtdelivercharge.setText("Delivery ₹"+dc);
+                    //editor.putString("deliverycharge", dc);
 
-                editor.commit();
+                    //txt delivery time
+                    //Double time = 20.0 + (distance / 0.2);
+                    //String timestr = String.format("%.0f", time);
+                    //time += 15.0;
+                    //String timestr1 = String.format("%.0f", time);
+                    //restViewHolder.txtdeliverytime.setText(timestr+"-"+timestr1);
+                    //editor.putString("deliverytime", timestr + "-" + timestr1);
+
+                    editor.commit();
 
 
-                Intent foodlist = new Intent(context,MenuActivity.class);
-                foodlist.putExtra("RestaurantId",listData.get(i).getId());
-                context.startActivity(foodlist);
+                    Intent foodlist = new Intent(context, MenuActivity.class);
+                    foodlist.putExtra("RestaurantId", listData.get(i).getId());
+                    context.startActivity(foodlist);
+                }
             }
         });
 

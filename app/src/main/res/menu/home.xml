@@ -4,21 +4,22 @@
 
     <item android:id="@+id/ordermeal"
         android:title="Order Meal"
-        android:icon="@drawable/ic_edit_black_24dp">
+        android:icon="@drawable/ic_ordermeallogo">
 
     </item>
-    <item android:id="@+id/confectionaries"
+    <item android:id="@+id/bakery"
 
-        android:title="Confectionaries"
-        android:icon="@drawable/ic_time">
+        android:title="Bakery"
+        android:icon="@drawable/ic_cake_black_24dp">
     </item>
-    <item android:id="@+id/eventcatering"
+    <item android:id="@+id/hotdeals"
 
-        android:title="Event Catering"
-        android:icon="@drawable/ic_arrow_back_black_24dp">
+        android:title="Hot Deals"
+        android:icon="@drawable/ic_restaurant_black_24dp">
     </item>
-    <item android:id="@+id/orders"
-        android:title="Orders"
-        android:icon="@drawable/ic_edit_location_black_24dp">
+    <item android:id="@+id/nightorders"
+
+        android:title="Night Orders"
+        android:icon="@drawable/ic_update_black_24dp">
     </item>
 </menu>

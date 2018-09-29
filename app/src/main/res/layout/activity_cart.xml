@@ -2,45 +2,76 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/root_layout"
     tools:context=".Cart">
 
 
-    <android.support.v7.widget.RecyclerView
+    <RelativeLayout
         android:layout_width="match_parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:id="@+id/listCart"
+        android:background="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/ordercard"
+        android:id="@+id/tbcart"
+        android:elevation="4dp"
+        android:layout_marginBottom="4dp"
+        android:padding="10dp"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:tint="@android:color/darker_gray"
+            android:id="@+id/imggoback"
+            android:layout_height="30dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:text="Cart"
+            />
+    </RelativeLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbcart"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/listCart"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:background="@android:color/transparent"
-        android:layout_height="0dp" />
+        app:layout_constraintBottom_toTopOf="@+id/ordercard"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:id="@+id/ordercard"
+        android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/listCart"
-        android:layout_alignParentBottom="true"
-        android:layout_height="100dp">
+        android:layout_height="wrap_content">
 
         <RelativeLayout
             android:layout_width="match_parent"
-
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:id="@+id/lll"
                 android:gravity="center_vertical"
                 >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="25dp"
                     android:textColor="@android:color/background_dark"
                     android:text="Total: "
                     />
@@ -48,7 +79,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="24sp"
+                    android:textSize="24dp"
                     android:textColor="@android:color/secondary_text_light"
                     android:text="$10,000 "
                     android:id="@+id/total"
@@ -59,10 +90,12 @@
             <info.hoang8f.widget.FButton
                 android:layout_width="match_parent"
                 android:text="Place Order"
+                android:layout_below="@+id/lll"
+
                 android:id="@+id/btnPlaceOrder"
                 android:layout_marginHorizontal="8dp"
                 android:textColor="@android:color/white"
-                android:layout_alignParentBottom="true"
+
                 android:shadowColor="@android:color/black"
                 android:layout_height="wrap_content"
                 app:shadowEnabled="true"
@@ -75,4 +108,5 @@
 
     </android.support.v7.widget.CardView>
 
+    </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

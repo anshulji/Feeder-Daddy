@@ -4,19 +4,28 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+
+
         <item
-            android:id="@+id/nav_menu"
-            android:icon="@drawable/ic_restaurant_black_24dp"
-            android:title="Menu"
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_profile"
+            android:title="Profile"
             android:iconTint="@android:color/white"
             />
 
         <item
+            android:id="@+id/nav_ordermeal"
+            android:icon="@drawable/ic_restaurant_black_24dp"
+            android:title="Order Meal"
+            android:iconTint="@android:color/white"
+            />
+
+        <!-- item
             android:id="@+id/nav_cart"
             android:icon="@drawable/ic_shopping_cart_black_24dp"
             android:title="Cart"
             android:iconTint="@android:color/white"
-            />
+            / -->
         <item
             android:id="@+id/nav_orders"
             android:icon="@drawable/ic_access_time_black_24dp"
@@ -24,9 +33,15 @@
             android:iconTint="@android:color/white"
             />
         <item
-            android:id="@+id/nav_log_out"
-            android:icon="@drawable/ic_exit_to_app_black_24dp"
-            android:title="Sign Out"
+            android:id="@+id/nav_cart"
+            android:icon="@drawable/ic_shopping_cart_black_24dp"
+            android:title="Cart"
+            android:iconTint="@android:color/white"
+            />
+        <item
+            android:id="@+id/feedback"
+            android:icon="@drawable/ic_phone_black_24dp"
+            android:title="Give Feedback"
             android:iconTint="@android:color/white"
             />
 

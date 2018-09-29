@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingVertical="2dp"
+    >
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:elevation="5dp"
+        android:layout_height="wrap_content">
+
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        >
+
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Anshul Jindal"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:id="@+id/txtusernamereview"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical|start"
+                />
+
+            <RatingBar
+                android:id="@+id/ratingbarreview"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/rlname"
+                android:layout_marginBottom="6dp"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/txtrating"
+                android:numStars="5"
+                android:progressTint="@android:color/darker_gray"
+                android:rating="3.2" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtcommentreview"
+                android:text="This is awesome !"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+
+                />
+
+
+
+
+    </LinearLayout>
+</RelativeLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

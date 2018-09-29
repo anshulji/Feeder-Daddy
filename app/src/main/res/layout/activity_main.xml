@@ -5,9 +5,14 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@drawable/grad_home_bg"
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:animateLayoutChanges="true"
+        android:layout_height="match_parent">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -22,9 +27,14 @@
 
         android:layout_alignParentBottom="true"
         android:id="@+id/bottomnavigationview"
+        android:animateLayoutChanges="true"
         android:layout_width="match_parent"
-        android:background="#99ffffff"
+        android:background="#ffffff"
+
+        android:layoutAnimation="@anim/layout_fall_down"
+        android:layout_gravity="bottom"
         app:menu="@menu/home"
         android:layout_height="45dp"/>
+    </android.support.design.widget.CoordinatorLayout>
 
 </RelativeLayout>

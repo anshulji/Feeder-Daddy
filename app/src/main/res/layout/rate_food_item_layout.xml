@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingVertical="2dp"
+    >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:background="@android:color/white"
+            android:id="@+id/view_foreground"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_vertical"
+                >
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:id="@+id/food_image"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
+                    android:src="@drawable/ic_play_arrow_black_24dp"
+                    android:tint="@android:color/darker_gray"
+                    android:id="@+id/food_image_veg"
+                    android:layout_height="20dp" />
+
+                </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_toLeftOf="@+id/rll"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/food_image"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+                        android:text="Food 01"
+                        android:textSize="17dp"
+                        android:id="@+id/food_name"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="10dp"
+                        />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="70dp"
+                    android:id="@+id/rll"
+                    android:layout_alignParentRight="true"
+                    android:layout_height="wrap_content">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_star_black_24dp"
+                    android:layout_gravity="right"
+                    android:background="@drawable/bt_bg"
+                    android:padding="5dp"
+                    android:id="@+id/imgrate"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:tint="@android:color/darker_gray"
+                    />
+
+            </RelativeLayout>
+        </RelativeLayout>
+
+</RelativeLayout>
+</RelativeLayout>

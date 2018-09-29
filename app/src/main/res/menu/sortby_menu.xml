@@ -14,14 +14,15 @@
                 android:id="@+id/nearest"
                 android:title="Nearest"/>
             <item
-                android:id="@+id/deliverycost"
-                android:title="Delivery Cost"/>
-            <item
                 android:id="@+id/rating"
                 android:title="Rating"/>
             <item
                 android:id="@+id/alpha"
                 android:title="Name"/>
+            <item
+                android:id="@+id/pureveg"
+                android:title="Pure Veg"/>
+
         </menu>
 
     </item>

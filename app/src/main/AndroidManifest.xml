@@ -8,21 +8,28 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/feeder_daddy_logo"
         android:label="Feeder Daddy"
+        android:largeHeap="true"
         android:roundIcon="@drawable/feeder_daddy_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:label,android:icon">
         <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDXWatuJaYlkrot2lLGQUTGo1-zeEuR_sw" />
+        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <meta-data
+        <!--
+             meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBe4I3sxlK7iDrQKRX1nzPqD9PAgwSxBGA" />
+            android:value="AIzaSyBe4I3sxlK7iDrQKRX1nzPqD9PAgwSxBGA" /
+        -->
 
         <activity
             android:name=".SplashActivity"
@@ -36,13 +43,25 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".OrderMeal" />
-        <activity android:name=".Menus" />
         <activity android:name=".MenuActivity" />
         <activity android:name=".FoodListActivity" />
         <activity android:name=".FoodDetails" />
         <activity android:name=".Cart" />
         <activity android:name=".Orders" />
-        <activity android:name=".PlaceOrder"></activity>
+        <activity android:name=".PlaceOrder" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".HotDealDetailsActivity" />
+        <activity android:name=".ViewBillActivity" />
+        <activity android:name=".FeedbackActivity" />
+
+        <service
+            android:name=".Service.ListenOrder"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".RateActivity" />
+        <activity android:name=".EventCatering" />
+        <activity android:name=".NightOrdersActivity"></activity>
     </application>
 
 </manifest>

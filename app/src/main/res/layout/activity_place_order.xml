@@ -19,7 +19,7 @@
         <ImageView
             android:layout_width="30dp"
             android:src="@drawable/ic_arrow_back_black_24dp"
-            android:tint="@android:color/tertiary_text_dark"
+            android:tint="@android:color/darker_gray"
             android:id="@+id/imggoback"
             android:layout_height="30dp" />
         <TextView
@@ -34,6 +34,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
+        android:layout_above="@+id/btnconfirmorder"
         android:layout_below="@+id/tbplaceorder"
         android:layout_height="match_parent">
     <RelativeLayout
@@ -54,7 +55,6 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:id="@+id/imgrest"
-                android:src="@drawable/grad_bg"
                 />
             <TextView
                 android:layout_width="wrap_content"
@@ -108,13 +108,14 @@
         </android.support.v7.widget.CardView>
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_marginVertical="5dp"
+            android:layout_marginTop="5dp"
             android:id="@+id/cvbill"
             android:layout_below="@+id/rlrestinfo"
             android:layout_height="wrap_content">
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
             android:padding="10dp"
             >
             <TextView
@@ -237,25 +238,81 @@
         </android.support.v7.widget.CardView>
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
+            android:id="@+id/cvchoosetime"
+            android:elevation="4dp"
+            android:visibility="gone"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/cvbill"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                >
+                <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Order Receiving Time"
+                android:textSize="17dp"
+                android:textStyle="bold"
+                android:id="@+id/txtsetorderreceivetime"
+                app:layout_constraintTop_toTopOf="parent"
+                android:textColor="@android:color/black"
+                />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="15dp"
+                    android:layout_toLeftOf="@+id/imgedittime"
+                    android:id="@+id/txttime"
+                    />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/imgedittime"
+                    android:src="@drawable/ic_edit_black_24dp"
+                    android:paddingLeft="10dp"
+                    android:tint="@android:color/holo_blue_dark"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
             android:id="@+id/cvaddress"
             android:elevation="4dp"
-            android:layout_below="@+id/cvbill"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/cvchoosetime"
             android:layout_height="wrap_content">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:padding="10dp"
+
                 android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Delivery Address"
+                    android:textSize="17dp"
+                    android:textStyle="bold"
+                    android:id="@+id/txtdeliveryaddress"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:textColor="@android:color/black"
+                    />
                 <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:src="@drawable/ic_place_black_24dp"
                     android:tint="@android:color/holo_red_light"
                     android:id="@+id/imgaddresslogo"
+                    android:layout_below="@+id/txtdeliveryaddress"
                     android:layout_gravity="center"
                     />
                 <TextView
                     android:layout_margin="10dp"
+                    android:layout_below="@+id/txtdeliveryaddress"
                     android:layout_width="wrap_content"
                     android:layout_toRightOf="@+id/imgaddresslogo"
                     android:layout_toLeftOf="@+id/imgeditaddress"
@@ -265,6 +322,7 @@
                     />
                 <ImageView
                     android:layout_width="50dp"
+                    android:layout_below="@+id/txtdeliveryaddress"
                     android:layout_alignParentRight="true"
                     android:id="@+id/imgeditaddress"
                     android:padding="10dp"
@@ -278,6 +336,7 @@
                     android:layout_below="@+id/imgeditaddress"
                     android:layout_alignParentRight="true"
                     android:text="Edit Address"
+                    android:id="@+id/txteditaddress"
                     android:textAlignment="center"
                     android:textColor="#1e90ff"
                     android:textSize="10dp"
@@ -287,21 +346,88 @@
 
 
         </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:id="@+id/cvpaymentmethod"
+            android:elevation="4dp"
+            android:layout_marginTop="5dp"
+
+            android:layout_below="@+id/cvaddress"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Payment Method"
+                    android:textColor="@android:color/black"
+                    android:textSize="17dp"
+                    android:id="@+id/txtchoosepaymentmethod"
+                    android:textStyle="bold"
+                    />
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:id="@+id/rgpaymentmethod"
+                    android:layout_below="@+id/txtchoosepaymentmethod"
+                    android:layout_height="wrap_content">
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:text="Cash On Delivery"
+                        android:checked="true"
+                        android:id="@+id/rbcashondelivery"
+                        android:layout_height="wrap_content" />
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:text="Pay amount through Paytm on mobile no."
+                        android:id="@+id/rbpaytm"
+                        android:layout_height="wrap_content" />
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:text="Pay amount through Tez on mobile no."
+                        android:id="@+id/rbtez"
+                        android:layout_height="wrap_content" />
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:text="Pay amount through PhonePe on mobile no."
+                        android:id="@+id/rbphonepe"
+                        android:layout_height="wrap_content" />
+
+                </RadioGroup>
+
+
+
+            </RelativeLayout>
+
+
+
+        </android.support.v7.widget.CardView>
+
 
 
     </RelativeLayout>
+
+
+
+
     </ScrollView>
+
     <info.hoang8f.widget.FButton
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_height="50dp"
-        android:textColor="@android:color/white"
         android:text="Confirm Order"
         android:id="@+id/btnconfirmorder"
-        android:layout_margin="5dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:background="@drawable/bt_bg"
-        android:textSize="15dp"
+        android:layout_marginHorizontal="8dp"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:shadowColor="@android:color/black"
+        android:layout_height="wrap_content"
+        app:shadowEnabled="true"
+        app:shadowHeight="5dp"
+        app:cornerRadius="10dp"
+        android:layout_margin="8dp"
+        app:fButtonColor="#1e90ff"
         />
 
 
