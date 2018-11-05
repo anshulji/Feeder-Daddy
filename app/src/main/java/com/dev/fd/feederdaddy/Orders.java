@@ -90,7 +90,6 @@ public class Orders extends AppCompatActivity {
             loadOrders(getIntent().getStringExtra("userPhone"));
         }
 
-
     }
 
     private void loadOrders(final String phone) {
@@ -121,27 +120,28 @@ public class Orders extends AppCompatActivity {
             protected void populateViewHolder(final OrderViewHolder viewHolder, final Request model, final int position) {
                 Picasso.with(getBaseContext()).load(model.getRestaurantimage()).fit().centerCrop().into(viewHolder.imgrestaurant);
                 viewHolder.txtrestaurantname.setText(model.getRestaurantname());
+
+                String orderidstr = adapter.getRef(position).getKey();
+                orderidstr = orderidstr.substring(1,orderidstr.length());
                 viewHolder.txtorderstatus.setText(Common.convertCodeToStatus(model.getOrderstatus()));
                 viewHolder.txttotalamount.setText("Total: ₹" + model.getTotalamount());
                 viewHolder.txtordertime.setText(Common.getDate(Long.parseLong(model.getTimeinms())));
                 viewHolder.txtrestaurantareaname.setText(model.getRestaurantareaname());
 
-                if(model.getOrderstatus().equals("0") || model.getOrderstatus().equals("1"))
+                if(model.getOrderstatus().equals("11") || model.getOrderstatus().equals("1") || model.getOrderstatus().equals("-2"))
                 viewHolder.imgorderstatus.setImageResource(R.drawable.ic_time);
-                else if(model.getOrderstatus().equals("2"))
-                    viewHolder.imgorderstatus.setImageResource(R.drawable.ic_restaurant_black_24dp);
                 else if(model.getOrderstatus().equals("3"))
+                    viewHolder.imgorderstatus.setImageResource(R.drawable.ic_restaurant_black_24dp);
+                else if(model.getOrderstatus().equals("4"))
                     viewHolder.imgorderstatus.setImageResource(R.drawable.dispatched);
-                else if(model.getOrderstatus().equals("4") || model.getOrderstatus().equals("5"))
+                else if(model.getOrderstatus().equals("6") || model.getOrderstatus().equals("5"))
                 {viewHolder.imgorderstatus.setImageResource(R.drawable.order_delivered);
-
-
                 }
                 else if(model.getOrderstatus().equals("-1"))
                     viewHolder.imgorderstatus.setImageResource(R.drawable.order_cancelled);
 
-                viewHolder.txtorderstatusmessage.setText(model.getOrderstatusmessage());
-                if (!model.getOrderstatus().equals("3")) {
+                viewHolder.txtorderstatusmessage.setText("Order #"+orderidstr+"\n"+model.getOrderstatusmessage());
+                if (!model.getOrderstatus().equals("4")) {
                     viewHolder.rldeliveryboyinfo.setVisibility(View.GONE);
                 } else {
                     viewHolder.rldeliveryboyinfo.setVisibility(View.VISIBLE);
@@ -166,7 +166,7 @@ public class Orders extends AppCompatActivity {
                     });
                 }
 
-                if(model.getOrderstatus().equals("4"))
+                if(model.getOrderstatus().equals("5"))
                 {
                     viewHolder.btnrate.setVisibility(View.VISIBLE);
                     viewHolder.btnrate.setOnClickListener(new View.OnClickListener() {

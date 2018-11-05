@@ -16,6 +16,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,15 +38,20 @@ import com.dev.fd.feederdaddy.ViewHolder.HotDealViewHolder;
 import com.dev.fd.feederdaddy.model.Food;
 import com.dev.fd.feederdaddy.model.HotDeal;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import static com.dev.fd.feederdaddy.OrderMeal.deliverycharges;
 
 public class HotDeals extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
 
     FirebaseDatabase database;
-    DatabaseReference HotDealsRef,refdelivercharges;
+    DatabaseReference HotDealsRef,restref;
 
     DrawerLayout drawer;
 
@@ -59,7 +65,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
 
     ProgressBar progressBar;
 
-    String city;
+    String city,isopen="1";
 
     SharedPreferences sharedPreferences;
     public static String phone,userlatitude,userlongitude,deliverycharges;
@@ -94,7 +100,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
         TextView txtcallorwhatsapp = view.findViewById(R.id.txtcallorwhatsapp);
         progressBar = view.findViewById(R.id.progressbar);
 
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.WHITE);
         toolbar.setTitle("Hot Deals");
 
@@ -168,8 +174,25 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
 
             //init firebase
             database = FirebaseDatabase.getInstance();
-            HotDealsRef = database.getReference(city).child("HotDeals");
+            HotDealsRef = database.getReference(city).child("Foods").child("-1").child("1");
+            restref  = database.getReference(city).child("Restaurant").child("-1").child("isopen");
 
+            restref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue().toString().equals("1"))
+                        isopen="1";
+                    else
+                    {isopen="0";
+                        toolbar.setTitle("Hot Deals (Currently Closed)");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
 
             phone = sharedPreferences.getString("phone", "N/A");
             userlatitude = sharedPreferences.getString("latitude", "0.0");
@@ -196,7 +219,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
                     Typeface face = Typeface.createFromAsset(getActivity().getAssets(),"NABILA.TTF");
                     viewHolder.food_name.setTypeface(face);
 
-                    viewHolder.food_price.setText("₹ "+model.getPrice());
+                    viewHolder.food_price.setText("₹ "+model.getFullprice());
                     viewHolder.food_name.setText(model.getName());
                     Picasso.with(getActivity()).load(model.getImage()).into(viewHolder.food_image);
 
@@ -228,9 +251,20 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         new Database(getActivity()).cleanCart();
-                                        Intent fooddetail = new Intent(getActivity(),HotDealDetailsActivity.class);
+
+                                        SharedPreferences sharedPreferences = getContext().getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString("restaurantid", "-1");
+                                        editor.putString("isopen",isopen);
+                                        editor.putString("deliveryrate","0");
+                                        editor.putString("mindcdistance", "0.0");
+                                        editor.putString("mindeliverycharge","0");
+                                        editor.commit();
+                                        Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                         fooddetail.putExtra("isHotDeal","1");
                                         fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
+                                        fooddetail.putExtra("RestaurantId","-1");
+                                        fooddetail.putExtra("MenuId","1");
                                         startActivity(fooddetail);
                                     }
                                 });
@@ -244,9 +278,21 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
                             }
                             else
                             {
-                                Intent fooddetail = new Intent(getActivity(),HotDealDetailsActivity.class);
+
+                                SharedPreferences sharedPreferences = getContext().getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("restaurantid", "-1");
+                                editor.putString("isopen",isopen);
+                                editor.putString("deliveryrate","0");
+                                editor.putString("mindcdistance", "0.0");
+                                editor.putString("mindeliverycharge","0");
+                                editor.commit();
+                                Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                 fooddetail.putExtra("isHotDeal","1");
                                 fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
+                                fooddetail.putExtra("RestaurantId","-1");
+                                fooddetail.putExtra("MenuId","1");
+
                                 startActivity(fooddetail);
                             }
 
@@ -258,6 +304,21 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
             };
 
         }
+
+        final SwipeRefreshLayout pulltorefreshhome = view.findViewById(R.id.pulltorefreshhome);
+
+        pulltorefreshhome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                //startActivity(getActivity().getIntent());
+                ((MainActivity) getActivity()).refreshhotdeals();
+                //getActivity().finish();
+
+            }
+        });
+
+
+
     }
 
 

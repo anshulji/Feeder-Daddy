@@ -12,13 +12,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.dev.fd.feederdaddy.Common.Common;
-import com.dev.fd.feederdaddy.Database.Database;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Calendar;
 
-public class FeedbackActivity extends AppCompatActivity {
+public class EventCateringActivity extends AppCompatActivity {
+
 
     EditText etfeedback;
     Button btnfeedback;
@@ -30,7 +30,8 @@ public class FeedbackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feedback);
+        setContentView(R.layout.activity_event_catering2);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
@@ -46,7 +47,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
         //init firebase
         firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference("Feedbacks");
+        databaseReference = firebaseDatabase.getReference("EventCatering");
 
         etfeedback = findViewById(R.id.etfeedback);
         btnfeedback = findViewById(R.id.btnsubmitfeedback);
@@ -62,16 +63,17 @@ public class FeedbackActivity extends AppCompatActivity {
                     String key = databaseReference.push().getKey();
 
                     databaseReference.child(key).child("userphone").setValue(phone);
-                    databaseReference.child(key).child("feedback").setValue(etfeedback.getText().toString());
+                    databaseReference.child(key).child("request").setValue(etfeedback.getText().toString());
 
                     Calendar mcurrentTime = Calendar.getInstance();
                     long currenttime = mcurrentTime.getTimeInMillis();
-                    databaseReference.child(key).child("datetimeoffeedback").setValue(Common.getDate(currenttime));
+                    databaseReference.child(key).child("datetimeofrequest").setValue(Common.getDate(currenttime));
 
-                    Toast.makeText(FeedbackActivity.this, "Your feedback submited successfully !", Toast.LENGTH_SHORT).show();
+                    //databaseReference.child(phone).setValue(etfeedback.getText().toString());
+                    Toast.makeText(EventCateringActivity.this, "Your request submitted successfully !", Toast.LENGTH_SHORT).show();
                 }
                 else
-                    Toast.makeText(FeedbackActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EventCateringActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
             }
         });
 

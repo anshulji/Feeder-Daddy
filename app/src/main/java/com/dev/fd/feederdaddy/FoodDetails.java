@@ -1,5 +1,6 @@
 package com.dev.fd.feederdaddy;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,9 +13,11 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.dev.fd.feederdaddy.Common.Common;
 import com.dev.fd.feederdaddy.Database.Database;
 import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.R;
@@ -56,11 +60,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
 
     TextView food_name, food_quarterprice,food_halfprice,food_fullprice,food_quarterfinalprice,food_halffinalprice,food_fullfinalprice,
             food_quarterdiscount, food_halfdiscount, food_fulldiscount,food_description,txttotalrates,txtrating;
+    TextView fqname,fhname,ffname;
 
     TextView text_count;
 
 
-    RelativeLayout llquarter, llhalf, llfull;
+    RelativeLayout llquarter,rladdonq,rladdonh,rladdonf, llhalf, llfull;
 
     ImageView food_image,imgveg,imgnonveg,imggoback;
     RatingBar ratingBar;
@@ -69,16 +74,16 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
     ElegantNumberButton qnb,hnb,fnb;
 
     FButton btnshowreviews;
-    RecyclerView recyclerView,recycler_addon;
-    RecyclerView.LayoutManager layoutManager,layoutManager1;
+    RecyclerView recyclerView,recycler_addon_quarter,recycler_addon_half,recycler_addon_full;
+    RecyclerView.LayoutManager layoutManager,layoutManager1,layoutManager2,layoutManager3;
 
 
     FirebaseRecyclerAdapter<Reviews,ReviewsViewHolder> adapter;
-    FirebaseRecyclerAdapter<AddOnsModel,AddOnViewHolder> addonadapter;
+    FirebaseRecyclerAdapter<AddOnsModel,AddOnViewHolder> qaddonadapter,haddonadapter,faddonadapter;
 
 
 
-    String FoodId="",RestaurantId="",MenuId="",phone="",name="",city,timeidstr;
+    String FoodId="",RestaurantId="",MenuId="",phone="",name="",city,timeidstr,isaddon="0";
 
 
     Food currentFood;
@@ -91,27 +96,67 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
     FirebaseDatabase database;
     DatabaseReference foods,rating,restaurantrating,menurating;
 
+    Button btnmenu;
+    CardView cvgotomenu;
+
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_details);
 
+        btnmenu = findViewById(R.id.btnmenu);
+        cvgotomenu = findViewById(R.id.cvgotomenu);
+        if (getIntent().getExtras().getString("comeback") == null)
+        {
+            cvgotomenu.setVisibility(View.GONE);
+        }
+
+            btnmenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (getIntent().getStringExtra("comeback") != null) {
+                    String strgoback = getIntent().getStringExtra("comeback");
+                    if(strgoback.equals("yes"))
+                    {Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result","1");
+                        setResult(Activity.RESULT_OK,returnIntent);
+                    }
+                }
+                finish();
+            }
+        });
+
+        rladdonq  = findViewById(R.id.rladdonq);
+        rladdonh  = findViewById(R.id.rladdonh);
+        rladdonf  = findViewById(R.id.rladdonf);
+        rladdonq.setVisibility(View.GONE);
+        rladdonh.setVisibility(View.GONE);
+        rladdonf.setVisibility(View.GONE);
+        recycler_addon_quarter = findViewById(R.id.recycler_addon_quarter);
+        recycler_addon_half = findViewById(R.id.recycler_addon_half);
+        recycler_addon_full = findViewById(R.id.recycler_addon_full);
+
+        fqname = findViewById(R.id.food_size_quarter);
+        fhname = findViewById(R.id.food_size_half);
+        ffname = findViewById(R.id.food_size_full);
+
+
         Calendar calendar = Calendar.getInstance();
         timeidstr = String.valueOf(calendar.getTimeInMillis());
         timeidstr = timeidstr.substring(timeidstr.length()-6,timeidstr.length()-2);
 
 
-
-        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
-
+        sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
         city = sharedPreferences.getString("city","N/A");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
 
-        database=database.getInstance();
+        database=FirebaseDatabase.getInstance();
 
         //get food id
         if(getIntent()!=null)
@@ -138,21 +183,30 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         qnb=(ElegantNumberButton)findViewById(R.id.number_button_quarter);
         hnb=(ElegantNumberButton)findViewById(R.id.number_button_half);
         fnb=(ElegantNumberButton)findViewById(R.id.number_button_full);
-        //btnRating = findViewById(R.id.btn_rating);
 
-        /*btnRating.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showRatingDialog();
+        if(!Common.isOpen(this))
+        {
+            qnb.setVisibility(View.GONE);
+            hnb.setVisibility(View.GONE);
+            fnb.setVisibility(View.GONE);
+        }
+
+        if(getIntent().getStringExtra("isoutofstock")!=null)
+        {
+            if(getIntent().getStringExtra("isoutofstock").equals("1"))
+            {
+                qnb.setVisibility(View.GONE);
+                hnb.setVisibility(View.GONE);
+                fnb.setVisibility(View.GONE);
             }
-        });*/
+        }
+
 
         btnCart = findViewById(R.id.btnCart);
         text_count = findViewById(R.id.text_count);
 
         ratingBar = findViewById(R.id.ratingbar);
         txttotalrates = findViewById(R.id.txttotalrates);
-
 
         btnCart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,9 +287,6 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         txtrating = findViewById(R.id.txtrating);
 
 
-
-
-
         collapsingToolbarLayout= findViewById(R.id.collapsing);
         collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppbar);
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppbar);
@@ -251,78 +302,91 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
 
         btnshowreviews = findViewById(R.id.btnshowreview);
         recyclerView =findViewById(R.id.recycler_reviews);
-        recycler_addon = findViewById(R.id.recycler_addon);
+
 
         layoutManager =new LinearLayoutManager(this);
         layoutManager1 = new LinearLayoutManager(this);
+        layoutManager2 = new LinearLayoutManager(this);
+        layoutManager3 = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        recycler_addon.setLayoutManager(layoutManager1);
+        recycler_addon_quarter.setLayoutManager(layoutManager1);
+        recycler_addon_half.setLayoutManager(layoutManager2);
+        recycler_addon_full.setLayoutManager(layoutManager3);
 
-        addonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
-                foods.child("addons") // find that foods with menuid==categoryid
-        ) {
+        /*if(isaddon.equals("1")) {
+            addonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                    foods.child("addons") // find that foods with menuid==categoryid
+            ) {
 
-            @Override
-            protected void onDataChanged() {
-                super.onDataChanged();
-                recycler_addon.setAdapter(addonadapter);
-            }
+                @Override
+                protected void onDataChanged() {
+                    super.onDataChanged();
+                    recycler_addon.setAdapter(addonadapter);
+                }
 
-            @Override
-            protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
-                viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+                @Override
+                protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                    viewHolder.txtaddonitemname.setText(model.getAddonitemname());
 
-                viewHolder.txtaddonitemprice.setText("₹"+model.getAddonitemprice());
+                    viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
 
-                viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if(isChecked)
-                        {
-                           new Database(getBaseContext()).addToCart(new Order(
-                                   Integer.parseInt("4"+String.valueOf(position)+timeidstr),
-                                   FoodId,
-                                   "(AddOn)"+model.getAddonitemname()+" with "+currentFood.getName(),
-                                   "1",
-                                   model.getAddonitemprice(),
-                                   currentFood.getImage(),
-                                   RestaurantId,
-                                   MenuId
-                           ));
+                    viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked) {
+                                new Database(getBaseContext()).addToCart(new Order(
+                                        Integer.parseInt("4" + String.valueOf(position) + timeidstr),
+                                        FoodId,
+                                        "(AddOn)" + model.getAddonitemname() + " with " + currentFood.getName(),
+                                        "1",
+                                        model.getAddonitemprice(),
+                                        currentFood.getImage(),
+                                        RestaurantId,
+                                        MenuId
+                                ));
+                            } else {
+                                new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt("4" + String.valueOf(position) + timeidstr));
+                            }
+                            int ct = new Database(FoodDetails.this).getCountCart();
+                            String sct = String.valueOf(ct);
+                            if (ct == 0)
+                                text_count.setVisibility(View.GONE);
+                            else {
+                                text_count.setVisibility(View.VISIBLE);
+                                text_count.setText(sct);
+                            }
                         }
-                        else
-                        {
-                            new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt("4"+String.valueOf(position)+timeidstr));
-                        }
-                        int ct = new Database(FoodDetails.this).getCountCart();
-                        String sct = String.valueOf(ct);
-                        if(ct==0)
-                            text_count.setVisibility(View.GONE);
-                        else {
-                            text_count.setVisibility(View.VISIBLE);
-                            text_count.setText(sct);
-                        }
-                    }
-                });
+                    });
 
-            }
-        };
-
+                }
+            };
+        }*/
 
         btnshowreviews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-
                 if (btnshowreviews.getText().equals("SHOW REVIEWS"))
                 {
                     Toast.makeText(FoodDetails.this, "Please wait...", Toast.LENGTH_SHORT).show();
                     btnshowreviews.setText("HIDE REVIEWS");
-                  recyclerView.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.VISIBLE);
+
                     adapter = new FirebaseRecyclerAdapter<Reviews, ReviewsViewHolder>(Reviews.class, R.layout.reviews_item_layout, ReviewsViewHolder.class,
                             rating // find that foods with menuid==categoryid
                     ) {
 
+                        @Override
+                        protected void onDataChanged() {
+                            super.onDataChanged();
+                            recyclerView.setAdapter(adapter);
+
+                            if(adapter.getItemCount()==0)
+                            {
+                                Toast.makeText(FoodDetails.this, "No Reviews Available!", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
 
                         @Override
                         protected void populateViewHolder(ReviewsViewHolder viewHolder, Reviews model, int position) {
@@ -335,7 +399,7 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                         }
                     };
 
-                    recyclerView.setAdapter(adapter);
+
                 }
                 else
                 {  btnshowreviews.setText("SHOW REVIEWS");
@@ -360,26 +424,33 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         qnb.setOnValueChangeListener(new ElegantNumberButton.OnValueChangeListener() {
             @Override
             public void onValueChange(ElegantNumberButton view, int oldValue, int newValue) {
-                if(oldValue==0)
+                if(oldValue==0 && newValue==1)
                 {
+                    if(isaddon.equals("1"))
+                    rladdonq.setVisibility(View.VISIBLE);
+
                     new Database(getBaseContext()).addToCart(new Order(
-                            Integer.parseInt("1"+timeidstr),
+                            Integer.parseInt(timeidstr+"100"),
                             FoodId,
-                            "(Quarter)"+currentFood.getName(),
+                            "("+fqname.getText().toString()+")"+currentFood.getName(),
                             qnb.getNumber(),
                             String.valueOf(fqprice),
                             currentFood.getImage(),
                             RestaurantId,
                             MenuId
                     ));
+
+
+
                 }
                 else if(qnb.getNumber().equals("0"))
                 {
-                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt("1"+timeidstr));
+                    rladdonq.setVisibility(View.GONE);
+                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr+"100"));
                 }
                 else
                 {
-                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt("1"+timeidstr));
+                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt(timeidstr+"100"));
                 }
 
                 //Toast.makeText(FoodDetails.this, ""+timeidstr, Toast.LENGTH_SHORT).show();
@@ -399,10 +470,13 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
             public void onValueChange(ElegantNumberButton view, int oldValue, int newValue) {
                 if(oldValue==0)
                 {
+                    if(isaddon.equals("1"))
+                    rladdonh.setVisibility(View.VISIBLE);
+
                     new Database(getBaseContext()).addToCart(new Order(
-                            Integer.parseInt("2"+timeidstr),
+                            Integer.parseInt(timeidstr+"200"),
                             FoodId,
-                            "(Half)"+currentFood.getName(),
+                            "("+fhname.getText().toString()+")"+currentFood.getName(),
                             hnb.getNumber(),
                             String.valueOf(fhprice),
                             currentFood.getImage(),
@@ -412,11 +486,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 }
                 else if(hnb.getNumber().equals("0"))
                 {
-                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt("2"+timeidstr));
+                    rladdonh.setVisibility(View.GONE);
+                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr+"200"));
                 }
                 else
                 {
-                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt("2"+timeidstr));
+                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt(timeidstr+"200"));
                 }
                 int ct = new Database(FoodDetails.this).getCountCart();
                 String sct = String.valueOf(ct);
@@ -433,10 +508,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
             public void onValueChange(ElegantNumberButton view, int oldValue, int newValue) {
                 if(oldValue==0)
                 {
+                    if(isaddon.equals("1"))
+                    rladdonf.setVisibility(View.VISIBLE);
                     new Database(getBaseContext()).addToCart(new Order(
-                            Integer.parseInt("3"+timeidstr),
+                            Integer.parseInt(timeidstr+"300"),
                             FoodId,
-                            "(Full)"+currentFood.getName(),
+                            "("+ffname.getText().toString()+")"+currentFood.getName(),
                             fnb.getNumber(),
                             String.valueOf(ffprice),
                             currentFood.getImage(),
@@ -446,12 +523,13 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 }
                 else if(fnb.getNumber().equals("0"))
                 {
-                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt("3"+timeidstr));
+                    rladdonf.setVisibility(View.GONE);
+                    new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr+"300"));
 
                 }
                 else
                 {
-                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt("3"+timeidstr));
+                    new Database(getBaseContext()).updateFoodCart(String.valueOf(newValue),Integer.parseInt(timeidstr+"300"));
 
                 }
                 int ct = new Database(FoodDetails.this).getCountCart();
@@ -498,6 +576,175 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 currentFood = dataSnapshot.getValue(Food.class);
 
+                if(dataSnapshot.child("quartername").getValue()!=null)
+                    fqname.setText(dataSnapshot.child("quartername").getValue().toString());
+                else
+                    fqname.setText("Quarter");
+                if(dataSnapshot.child("halfname").getValue()!=null)
+                    fhname.setText(dataSnapshot.child("halfname").getValue().toString());
+                else
+                    fhname.setText("Half");
+                if(dataSnapshot.child("fullname").getValue()!=null)
+                    ffname.setText(dataSnapshot.child("fullname").getValue().toString());
+                else
+                    ffname.setText("Full");
+
+
+                if(dataSnapshot.child("addons").getValue()!=null)
+                {
+                    isaddon="1";
+                    qaddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                            foods.child("addons") // find that foods with menuid==categoryid
+                    ) {
+                        @Override
+                        protected void onDataChanged() {
+                            super.onDataChanged();
+                            recycler_addon_quarter.setAdapter(qaddonadapter);
+                        }
+
+                        @Override
+                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    String pos = String.valueOf(position+1);
+                                    if(pos.length()==1) pos="0"+pos;
+                                    if (isChecked) {
+                                        new Database(getBaseContext()).addToCart(new Order(
+                                                Integer.parseInt(timeidstr +"1"+ pos),
+                                                FoodId,
+                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+fqname.getText().toString()+" "+ currentFood.getName()+")" ,
+                                                "1",
+                                                model.getAddonitemprice(),
+                                                currentFood.getImage(),
+                                                RestaurantId,
+                                                MenuId
+                                        ));
+                                    } else {
+                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr +"1"+ pos));
+                                    }
+                                    int ct = new Database(FoodDetails.this).getCountCart();
+                                    String sct = String.valueOf(ct);
+                                    if (ct == 0)
+                                        text_count.setVisibility(View.GONE);
+                                    else {
+                                        text_count.setVisibility(View.VISIBLE);
+                                        text_count.setText(sct);
+                                    }
+                                }
+                            });
+
+                        }
+                    };
+                    haddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                            foods.child("addons") // find that foods with menuid==categoryid
+                    ) {
+
+                        @Override
+                        protected void onDataChanged() {
+                            super.onDataChanged();
+                            recycler_addon_half.setAdapter(haddonadapter);
+                        }
+
+                        @Override
+                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    String pos = String.valueOf(position+1);
+                                    if(pos.length()==1) pos="0"+pos;
+                                    if (isChecked) {
+                                        new Database(getBaseContext()).addToCart(new Order(
+                                                Integer.parseInt(timeidstr +"2"+ pos),
+                                                FoodId,
+                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+fhname.getText().toString()+" "+ currentFood.getName()+")" ,
+                                                "1",
+                                                model.getAddonitemprice(),
+                                                currentFood.getImage(),
+                                                RestaurantId,
+                                                MenuId
+                                        ));
+                                    } else {
+                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr +"2"+ pos));
+                                    }
+                                    int ct = new Database(FoodDetails.this).getCountCart();
+                                    String sct = String.valueOf(ct);
+                                    if (ct == 0)
+                                        text_count.setVisibility(View.GONE);
+                                    else {
+                                        text_count.setVisibility(View.VISIBLE);
+                                        text_count.setText(sct);
+                                    }
+                                }
+                            });
+
+                        }
+                    };
+                    faddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                            foods.child("addons") // find that foods with menuid==categoryid
+                    ) {
+
+                        @Override
+                        protected void onDataChanged() {
+                            super.onDataChanged();
+                            recycler_addon_full.setAdapter(faddonadapter);
+                        }
+
+                        @Override
+                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    String pos = String.valueOf(position+1);
+                                    if(pos.length()==1) pos="0"+pos;
+                                    if (isChecked) {
+                                        new Database(getBaseContext()).addToCart(new Order(
+                                                Integer.parseInt(timeidstr+"3"+pos),
+                                                FoodId,
+                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+ffname.getText().toString()+" "+ currentFood.getName()+")" ,
+                                                "1",
+                                                model.getAddonitemprice(),
+                                                currentFood.getImage(),
+                                                RestaurantId,
+                                                MenuId
+                                        ));
+                                    } else {
+                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr+"3"+pos));
+                                    }
+                                    int ct = new Database(FoodDetails.this).getCountCart();
+                                    String sct = String.valueOf(ct);
+                                    if (ct == 0)
+                                        text_count.setVisibility(View.GONE);
+                                    else {
+                                        text_count.setVisibility(View.VISIBLE);
+                                        text_count.setText(sct);
+                                    }
+                                }
+                            });
+
+                        }
+                    };
+                }
+                else
+                {
+                    isaddon="0";
+                    rladdonq.setVisibility(View.GONE);
+                    rladdonh.setVisibility(View.GONE);
+                    rladdonf.setVisibility(View.GONE);
+                }
+
                 Picasso.with(getBaseContext()).load(currentFood.getImage()).into(food_image);
                 if(currentFood.getVeg().equals("1")) {
                     imgveg.setVisibility(View.VISIBLE);
@@ -520,46 +767,85 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 if(currentFood.getFullprice().equals("null"))
                     llfull.setVisibility(View.GONE);
 
+                String isrestaurantdiscount = sharedPreferences.getString("restaurantdiscount","N/A");
+
                 if(!currentFood.getQuarterprice().equals("null"))
                 {
+
                     food_quarterprice.setText("₹"+currentFood.getQuarterprice());
-                    food_quarterdiscount.setText(currentFood.getQuarterdiscount()+"% OFF");
                     food_quarterprice.setPaintFlags(food_quarterprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     String qpricestr = currentFood.getQuarterprice();
-                    String qdiscountstr = currentFood.getQuarterdiscount();
+
+                    String qdiscountstr;
+                    if(isrestaurantdiscount.equals("null"))
+                        qdiscountstr = currentFood.getQuarterdiscount();
+                    else
+                        qdiscountstr = isrestaurantdiscount;
+
                     double qdis = Double.parseDouble(qdiscountstr);
                     double qprice = Double.parseDouble(qpricestr);
                      double fqpriced = qprice - ( (qdis*qprice)/100.0 );
                     fqprice = (int) fqpriced;
-                    food_quarterfinalprice.setText("₹"+fqprice);
+                    food_quarterfinalprice.setText(": ₹"+fqprice);
+                    if(!qdiscountstr.equals("0"))
+                    food_quarterdiscount.setText(qdiscountstr+"% OFF");
+                    else
+                    {
+                        food_quarterdiscount.setVisibility(View.GONE);
+                        food_quarterprice.setVisibility(View.GONE);
+                    }
 
                 }
                 if(!currentFood.getHalfprice().equals("null"))
                 {
                     food_halfprice.setText("₹"+currentFood.getHalfprice());
-                    food_halfdiscount.setText(currentFood.getHalfdiscount()+"% OFF");
                     food_halfprice.setPaintFlags(food_halfprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     String hpricestr = currentFood.getHalfprice();
-                    String hdiscountstr = currentFood.getHalfdiscount();
+
+                    String hdiscountstr;
+                    if(isrestaurantdiscount.equals("null"))
+                        hdiscountstr = currentFood.getHalfdiscount();
+                    else
+                        hdiscountstr = isrestaurantdiscount;
+
                     double hdis = Double.parseDouble(hdiscountstr);
                     double hprice = Double.parseDouble(hpricestr);
                      double fhpriced = hprice - ( (hdis*hprice)/100.0 );
                     fhprice = (int) fhpriced;
-                    food_halffinalprice.setText("₹"+fhprice);
+                    food_halffinalprice.setText(": ₹"+fhprice);
+                    if(!hdiscountstr.equals("0"))
+                        food_halfdiscount.setText(hdiscountstr+"% OFF");
+                    else
+                    {
+                        food_halfdiscount.setVisibility(View.GONE);
+                        food_halfprice.setVisibility(View.GONE);
+                    }
 
                 }
                 if(!currentFood.getFullprice().equals("null"))
                 {
                     food_fullprice.setText("₹"+currentFood.getFullprice());
-                    food_fulldiscount.setText(currentFood.getFulldiscount()+"% OFF");
                     food_fullprice.setPaintFlags(food_fullprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     String fpricestr = currentFood.getFullprice();
-                    String fdiscountstr = currentFood.getFulldiscount();
+
+                    String fdiscountstr;
+                    if(isrestaurantdiscount.equals("null"))
+                    fdiscountstr = currentFood.getFulldiscount();
+                    else
+                        fdiscountstr = isrestaurantdiscount;
+
                     double fdis = Double.parseDouble(fdiscountstr);
                     double fprice = Double.parseDouble(fpricestr);
                      double ffpriced = fprice - ( (fdis*fprice)/100.0 );
                     ffprice = (int) ffpriced;
-                    food_fullfinalprice.setText("₹"+ffprice);
+                    food_fullfinalprice.setText(": ₹"+ffprice);
+                    if(!fdiscountstr.equals("0"))
+                        food_fulldiscount.setText(fdiscountstr+"% OFF");
+                    else
+                    {
+                        food_fulldiscount.setVisibility(View.GONE);
+                        food_fullprice.setVisibility(View.GONE);
+                    }
 
                 }
 
@@ -590,7 +876,7 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
 
         value=values;
 
-        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
+         sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
          phone = sharedPreferences.getString("phone","N/A");
         name = sharedPreferences.getString("name","N/A");
 

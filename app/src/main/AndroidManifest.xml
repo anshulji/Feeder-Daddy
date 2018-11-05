@@ -17,6 +17,7 @@
         android:largeHeap="true"
         android:roundIcon="@drawable/feeder_daddy_logo"
         android:supportsRtl="true"
+        android:name="com.dev.fd.feederdaddy.MyFirebaseApp"
         android:theme="@style/AppTheme"
         tools:replace="android:label,android:icon">
         <meta-data
@@ -39,6 +40,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".SignUpActivity" />
@@ -47,21 +49,39 @@
         <activity android:name=".FoodListActivity" />
         <activity android:name=".FoodDetails" />
         <activity android:name=".Cart" />
-        <activity android:name=".Orders" />
+        <activity android:name=".Orders" >
+            <intent-filter>
+                <action android:name="ORDERS"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".PlaceOrder" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".HotDealDetailsActivity" />
         <activity android:name=".ViewBillActivity" />
         <activity android:name=".FeedbackActivity" />
 
-        <service
+        <service android:name=".Service.MyFirebaseIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".Service.MyFirebaseMessaging">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!--
+             service
             android:name=".Service.ListenOrder"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true" /
+        -->
 
         <activity android:name=".RateActivity" />
-        <activity android:name=".EventCatering" />
-        <activity android:name=".NightOrdersActivity"></activity>
+        <activity android:name=".NightOrdersActivity" />
+        <activity android:name=".EventCateringActivity"></activity>
     </application>
 
 </manifest>

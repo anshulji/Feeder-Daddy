@@ -6,8 +6,6 @@
     android:layout_height="wrap_content"
     tools:context=".MenuActivity">
 
-
-
     <LinearLayout
         android:id="@+id/llrv"
 
@@ -61,7 +59,10 @@
             android:layout_gravity="center"
             style="@style/Base.Widget.AppCompat.ProgressBar"
             />
-
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:layout_width="match_parent"
+                android:id="@+id/pulltorefreshhome"
+                android:layout_height="wrap_content">
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -92,6 +93,7 @@
 
                 </RelativeLayout>
             </ScrollView>
+            </android.support.v4.widget.SwipeRefreshLayout>
         </RelativeLayout>
     </LinearLayout>
 

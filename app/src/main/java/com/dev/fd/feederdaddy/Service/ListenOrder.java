@@ -23,14 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import static com.dev.fd.feederdaddy.PlaceOrder.listenservice;
 
 public class ListenOrder extends Service implements ChildEventListener{
     FirebaseDatabase db;
     Query requests;
 
     public ListenOrder() {
-
 
     }
 

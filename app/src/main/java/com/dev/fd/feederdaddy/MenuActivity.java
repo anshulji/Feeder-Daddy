@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -137,7 +138,7 @@ public class MenuActivity extends AppCompatActivity {
         if(getIntent()!=null) {
             RestaurantId = getIntent().getStringExtra("RestaurantId");
             menulist = database.getReference(city).child("Menus").child(RestaurantId);
-            restcustommessageref = database.getReference(city).child("Restaurant").child(RestaurantId).child("custommessage");
+            /*restcustommessageref = database.getReference(city).child("Restaurant").child(RestaurantId).child("custommessage");
             restcustommessageref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -167,7 +168,7 @@ public class MenuActivity extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            });
+            });*/
 
             //loading list
             adapter =new FirebaseRecyclerAdapter<Menu,MenuViewHolder>(Menu.class,R.layout.menu_item,MenuViewHolder.class,
@@ -236,7 +237,7 @@ public class MenuActivity extends AppCompatActivity {
         loadSuggest();
 
         materialSearchBar.setLastSuggestions(SuggestList);
-        materialSearchBar.setCardViewElevation(10);
+        materialSearchBar.setCardViewElevation(0);
         materialSearchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -288,6 +289,15 @@ public class MenuActivity extends AppCompatActivity {
 
         setupSlider();
 
+        final SwipeRefreshLayout pulltorefreshhome = findViewById(R.id.pulltorefreshhome);
+
+        pulltorefreshhome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                startActivity(getIntent());
+                finish();
+            }
+        });
 
     }
 
@@ -300,6 +310,7 @@ public class MenuActivity extends AppCompatActivity {
     private void setupSlider() {
         sliderLayout = findViewById(R.id.slidermenu);
         sliderLayout.setVisibility(View.INVISIBLE);
+        sliderLayout.stopAutoCycle();
         image_list = new HashMap<>();
 
         DatabaseReference menubannerref = database.getReference(city).child("RestaurantBanner").child(RestaurantId);
@@ -335,6 +346,7 @@ public class MenuActivity extends AppCompatActivity {
                                     Intent intent = new Intent(MenuActivity.this,FoodDetails.class);
 
                                     //we will start food details activity by sending intent extras
+                                    intent.putExtra("comeback","yes");
                                     intent.putExtra("RestaurantId",restaurantid);
                                     intent.putExtra("MenuId",menuid);
                                     intent.putExtra("FoodId",foodid);
@@ -349,8 +361,9 @@ public class MenuActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         sliderLayout.setVisibility(View.VISIBLE);
+                        sliderLayout.startAutoCycle();
                     }
-                }, 1000);
+                }, 0);
 
             }
 

@@ -101,7 +101,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_remove_shopping_cart_black_24dp"
+                    android:src="@drawable/ic_clear_black_24dp"
                     android:layout_gravity="right"
                     android:id="@+id/imgremovefoodfromcart"
                     android:layout_alignParentRight="true"

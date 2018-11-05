@@ -26,6 +26,11 @@ import com.google.firebase.database.ValueEventListener;
 
 public class SplashActivity extends AppCompatActivity {
 
+
+    private static final String APP_VERSION = "1.0";
+    private String app_version,phone;
+
+
     //waiting duration
     private  int SPLASH_DISPLAY_LENGTH = 500;
     RelativeLayout logo,signuplayout;
@@ -57,9 +62,22 @@ public class SplashActivity extends AppCompatActivity {
 
         /* New Handler to start the Menus-Activity
          * and close this Splash-Screen after some seconds.*/
+
+
+
         mAuth=FirebaseAuth.getInstance();
         final SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
-        final String phone = sharedPreferences.getString("phone","N/A");
+        app_version = sharedPreferences.getString("appversion","N/A");
+
+        if(!app_version.equals(APP_VERSION))
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("phone", "N/A");
+            editor.putString("appversion",APP_VERSION);
+            editor.commit();
+        }
+
+        phone = sharedPreferences.getString("phone","N/A");
 
         if(!phone.equals("N/A"))
         {
@@ -105,6 +123,10 @@ public class SplashActivity extends AppCompatActivity {
                     */
 
                     Intent mainIntent = new Intent(SplashActivity.this,MainActivity.class);
+                    if(getIntent().getStringExtra("FCM")!=null)
+                    {
+                        mainIntent.putExtra("FCM","1");
+                    }
                     startActivity(mainIntent);
                     finish();
 

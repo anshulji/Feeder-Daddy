@@ -7,15 +7,16 @@
     android:background="@drawable/grad_bg"
     android:animateLayoutChanges="true"
     tools:context=".SplashActivity">
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-
-        android:layout_height="wrap_content"
+    <ScrollView
+        android:layout_width="match_parent"
         android:layout_centerInParent="true"
+        android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:paddingHorizontal="40dp"
+        android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
+
         >
 
         <RelativeLayout
@@ -83,7 +84,7 @@
                         android:inputType="textPersonName"
                         android:paddingHorizontal="15dp"
                         android:textSize="20dp"
-                        android:background="@drawable/et_bg"
+                        android:background="@drawable/et_bg_1"
                         />
                 </LinearLayout>
 
@@ -111,7 +112,7 @@
                         android:inputType="phone"
                         android:paddingHorizontal="15dp"
                         android:textSize="20dp"
-                        android:background="@drawable/et_bg"
+                        android:background="@drawable/et_bg_1"
                         />
                 </LinearLayout>
 
@@ -129,7 +130,7 @@
                 android:paddingHorizontal="70dp"
                 android:layout_centerHorizontal="true"
                 android:textSize="16dp"
-                android:background="@drawable/bt_bg"
+                android:background="@drawable/bt_bg_1"
 
                 />
 
@@ -140,4 +141,5 @@
 
 
     </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

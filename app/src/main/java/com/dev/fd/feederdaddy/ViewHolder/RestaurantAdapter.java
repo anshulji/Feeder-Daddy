@@ -39,11 +39,13 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.dev.fd.feederdaddy.OrderMeal.deliverycharges;
+import static com.dev.fd.feederdaddy.OrderMeal.mindcdistance;
+import static com.dev.fd.feederdaddy.OrderMeal.mindeliverycharge;
 import static com.dev.fd.feederdaddy.OrderMeal.userlongitude;
 
 class RestViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-    public TextView txtrestaurantname,txtrating,txtdistance,txttotalrates,txtdeliverytime,txtdelivercharge,txtclosed,txtopentime;
+    public TextView txtrestaurantname,txtrating,txtdistance,txttotalrates,txtdeliverytime,txtdelivercharge,txtclosed,txtopentime,txtrestdiscount;
     public ImageView imgveg,imgnonveg,imgresaturant;
     public RatingBar ratingBar;
 
@@ -66,6 +68,7 @@ class RestViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
         imgnonveg = itemView.findViewById(R.id.imgnonveg);
         imgresaturant = itemView.findViewById(R.id.imgrestaurant);
 
+        txtrestdiscount = itemView.findViewById(R.id.txtrestdiscount);
 
         itemView.setOnClickListener(this);
 
@@ -100,7 +103,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(R.layout.restaurant_item,null);
 
-
         return new RestViewHolder(itemView);
     }
 
@@ -111,6 +113,16 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         Typeface face = Typeface.createFromAsset(context.getAssets(),"NABILA.TTF");
         restViewHolder.txtrestaurantname.setTypeface(face);
         restViewHolder.txtrestaurantname.setText(listData.get(i).getName());
+
+        if(listData.get(i).getRestaurantdiscount().equals("null"))
+        {
+            restViewHolder.txtrestdiscount.setVisibility(View.GONE);
+        }
+        else
+        {
+            restViewHolder.txtrestdiscount.setVisibility(View.VISIBLE);
+            restViewHolder.txtrestdiscount.setText(listData.get(i).getRestaurantdiscount()+"% OFF");
+        }
 
         //img veg and nonveg
         if(!listData.get(i).getVeg().equals("1"))
@@ -134,10 +146,12 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         //txt delivery rate
 
         Double rate = Double.parseDouble(deliverycharges);
+        final Double mindcdistance = Double.parseDouble(OrderMeal.mindcdistance);
+        final Double mindeliverycharge= Double.parseDouble(OrderMeal.mindeliverycharge);
         Double charge;
-        if(distance<4.0)
+        if(distance<mindcdistance)
         {
-            charge = 20.0;
+            charge = mindeliverycharge;
         }
         else {
             charge = distance * rate;
@@ -149,7 +163,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         restViewHolder.txttotalrates.setText("("+listData.get(i).getTotalrates()+")");
 
         //txt delivery time
-        Double time = 20.0+ (distance/0.2);
+        Double time = 20.0 + (distance/0.2);
         String timestr = String.format("%.0f",time);
         time+=15.0;
         String timestr1 = String.format("%.0f",time);
@@ -191,8 +205,35 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
                 String resid = sharedPreferences.getString("restaurantid","N/A");
                 if(listData.get(i).getIsopen().equals("0"))
                 {
-                    Toast.makeText(context, "This Restaurant is closed currently !", Toast.LENGTH_SHORT).show();
-                }
+                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context,R.style.MyDialogTheme);
+                    alertDialogBuilder.setTitle("Restaurant is closed currently!");
+                    alertDialogBuilder.setMessage("You can explore this restaurant's menu but you won't be able to place order from this restaurant.");
+                    alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int in) {
+                            new Database(context).cleanCart();
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("restaurantdiscount",listData.get(i).getRestaurantdiscount());
+                            editor.putString("restaurantid",listData.get(i).getId());
+                            editor.putString("isopen","0");
+                            editor.putString("deliveryrate",deliverycharges);
+                            editor.putString("mindcdistance", String.valueOf(mindcdistance));
+                            editor.putString("mindeliverycharge", String.valueOf(mindeliverycharge));
+                            editor.commit();
+
+                            Intent foodlist = new Intent(context, MenuActivity.class);
+                            foodlist.putExtra("RestaurantId", listData.get(i).getId());
+                            context.startActivity(foodlist);
+
+                        }
+                    });
+                    alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+                    alertDialogBuilder.show();                }
                 else if (ct!=0 && !resid.equals("N/A") && !listData.get(i).getId().equals(resid))
                 {
                     final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context,R.style.MyDialogTheme);
@@ -203,8 +244,12 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
                         public void onClick(DialogInterface dialogInterface, int in) {
                             new Database(context).cleanCart();
                             SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("restaurantdiscount",listData.get(i).getRestaurantdiscount());
                             editor.putString("restaurantid",listData.get(i).getId());
+                            editor.putString("isopen","1");
                             editor.putString("deliveryrate",deliverycharges);
+                            editor.putString("mindcdistance", String.valueOf(mindcdistance));
+                            editor.putString("mindeliverycharge", String.valueOf(mindeliverycharge));
                             editor.commit();
 
                             Intent foodlist = new Intent(context, MenuActivity.class);
@@ -223,8 +268,10 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
                 }
                 else {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("restaurantdiscount",listData.get(i).getRestaurantdiscount());
                     editor.putString("restaurantid",listData.get(i).getId());
                     editor.putString("deliveryrate",deliverycharges);
+                    editor.putString("isopen","1");
                     //editor.putString("restaurantname", listData.get(i).getName());
                     //editor.putString("restaurantrating", listData.get(i).getRating());
                     //editor.putString("restaurantimage", listData.get(i).getImage());

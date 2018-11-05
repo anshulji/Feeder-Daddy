@@ -6,16 +6,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,15 +37,18 @@ import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.ViewHolder.HotDealViewHolder;
 import com.dev.fd.feederdaddy.model.HotDeal;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class NightOrdersActivity extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
 
     FirebaseDatabase database;
-    DatabaseReference NightOrdersRef,refdelivercharges;
+    DatabaseReference NightOrdersRef,restref;
 
     DrawerLayout drawer;
 
@@ -55,7 +62,7 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
 
     ProgressBar progressBar;
 
-    String city;
+    String city,isopen="1";
 
     SharedPreferences sharedPreferences;
     public static String phone,userlatitude,userlongitude,deliverycharges;
@@ -163,8 +170,24 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
 
             //init firebase
             database = FirebaseDatabase.getInstance();
-            NightOrdersRef = database.getReference(city).child("NightOrders");
+            NightOrdersRef = database.getReference(city).child("Foods").child("-2").child("1");
+            restref  = database.getReference(city).child("Restaurant").child("-2").child("isopen");
 
+            restref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue().toString().equals("1"))
+                        isopen="1";
+                    else
+                        isopen="0";
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            })
+;
 
             phone = sharedPreferences.getString("phone", "N/A");
             userlatitude = sharedPreferences.getString("latitude", "0.0");
@@ -188,10 +211,18 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                 @Override
                 protected void populateViewHolder(HotDealViewHolder viewHolder, HotDeal model, int position) {
 
+                    if(isopen.equals("0")){
+                        int color = R.color.black_filter;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            viewHolder.food_image.setForeground(new ColorDrawable(ContextCompat.getColor(getContext(), color)));
+                        }
+                        viewHolder.food_price.setText("Closed");
+                    }
+
                     Typeface face = Typeface.createFromAsset(getActivity().getAssets(),"NABILA.TTF");
                     viewHolder.food_name.setTypeface(face);
 
-                    viewHolder.food_price.setText("₹ "+model.getPrice());
+                    viewHolder.food_price.setText("₹ "+model.getFullprice());
                     viewHolder.food_name.setText(model.getName());
                     Picasso.with(getActivity()).load(model.getImage()).into(viewHolder.food_image);
 
@@ -223,9 +254,21 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         new Database(getActivity()).cleanCart();
-                                        Intent fooddetail = new Intent(getActivity(),HotDealDetailsActivity.class);
+
+                                        SharedPreferences sharedPreferences = getContext().getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString("restaurantid", "-2");
+                                        editor.putString("isopen",isopen);
+                                        editor.putString("deliveryrate","0");
+                                        editor.putString("mindcdistance", "0.0");
+                                        editor.putString("mindeliverycharge","0");
+                                        editor.commit();
+
+                                        Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                         fooddetail.putExtra("isHotDeal","0");
                                         fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
+                                        fooddetail.putExtra("RestaurantId","-2");
+                                        fooddetail.putExtra("MenuId","1");
                                         startActivity(fooddetail);
                                     }
                                 });
@@ -239,9 +282,21 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                             }
                             else
                             {
-                                Intent fooddetail = new Intent(getActivity(),HotDealDetailsActivity.class);
+
+                                SharedPreferences sharedPreferences = getContext().getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("restaurantid", "-2");
+                                editor.putString("isopen",isopen);
+                                editor.putString("deliveryrate","0");
+                                editor.putString("mindcdistance", "0.0");
+                                editor.putString("mindeliverycharge","0");
+                                editor.commit();
+
+                                Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                 fooddetail.putExtra("isHotDeal","0");
                                 fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
+                                fooddetail.putExtra("RestaurantId","-2");
+                                fooddetail.putExtra("MenuId","1");
                                 startActivity(fooddetail);
                             }
 
@@ -253,6 +308,17 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
             };
 
         }
+
+
+        final SwipeRefreshLayout pulltorefreshhome = view.findViewById(R.id.pulltorefreshhome);
+
+        pulltorefreshhome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                ((MainActivity) getActivity()).refreshnightorders();
+            }
+        });
+
     }
 
 

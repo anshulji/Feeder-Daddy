@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.ViewHolder.FoodViewHolder;
@@ -31,9 +32,13 @@ import com.squareup.picasso.Picasso;
 import com.stepstone.apprating.AppRatingDialog;
 import com.stepstone.apprating.listener.RatingDialogListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import info.hoang8f.widget.FButton;
+
+import static android.view.View.GONE;
 
 
 public class RateActivity extends AppCompatActivity implements RatingDialogListener {
@@ -50,6 +55,8 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
     FirebaseRecyclerAdapter<Order,RateFoodViewHolder> adapter;
 
     String currentrequestsstr;
+
+    List<String> foodnames = new ArrayList<>();
 
 
     int flag=0,value=5;
@@ -132,46 +139,59 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
                         @Override
                         protected void populateViewHolder(final RateFoodViewHolder viewHolder, final Order model, int position) {
 
-                            String Foodname = model.getFoodname();
-                            for(int i=0;i<Foodname.length();i++)
+                            if(model.getFoodname().substring(0,7).equals("(AddOn)"))
                             {
-                                if(Foodname.charAt(i)==')')
-                                {
-                                    Foodname= Foodname.substring(i+1,Foodname.length());
-                                    break;
-                                }
+                                viewHolder.rlview.setVisibility(GONE);
                             }
-                            viewHolder.txtfoodname.setText(Foodname);
+                            else {
+                                viewHolder.rlview.setVisibility(View.VISIBLE);
 
-
-                            viewHolder.imgratebtn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-
-                                    MenuId = model.getMenuid();
-                                    FoodId = model.getFoodid();
-                                    foods=database.getReference(city).child("Foods").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
-                                    rating = database.getReference(city).child("Rating").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
-                                    restaurantrating = database.getReference(city).child("Restaurant").child(RestaurantId);
-                                    menurating = database.getReference(city).child("Menus").child(RestaurantId).child(model.getMenuid());
-
-                                    viewHolder.imgratebtn.setImageResource(R.drawable.order_delivered);
-                                    foods.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            currentFood=dataSnapshot.getValue(Food.class);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
-                                    showRatingDialog();
-
+                                String Foodname = model.getFoodname();
+                                for (int i = 0; i < Foodname.length(); i++) {
+                                    if (Foodname.charAt(i) == ')') {
+                                        Foodname = Foodname.substring(i + 1, Foodname.length());
+                                        break;
+                                    }
                                 }
-                            });
 
+                                if (foodnames.contains(Foodname))
+                                    viewHolder.rlview.setVisibility(GONE);
+                                else {
+                                    viewHolder.rlview.setVisibility(View.VISIBLE);
+                                    foodnames.add(Foodname);
+                                }
+
+                                viewHolder.txtfoodname.setText(Foodname);
+
+
+                                viewHolder.imgratebtn.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+
+                                        MenuId = model.getMenuid();
+                                        FoodId = model.getFoodid();
+                                        foods = database.getReference(city).child("Foods").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
+                                        rating = database.getReference(city).child("Rating").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
+                                        restaurantrating = database.getReference(city).child("Restaurant").child(RestaurantId);
+                                        menurating = database.getReference(city).child("Menus").child(RestaurantId).child(model.getMenuid());
+
+                                        viewHolder.imgratebtn.setImageResource(R.drawable.order_delivered);
+                                        foods.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                currentFood = dataSnapshot.getValue(Food.class);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                        showRatingDialog();
+
+                                    }
+                                });
+                            }
                         }
                     };
 
@@ -191,8 +211,8 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
         btndone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseReference.child("orderstatus").setValue("5");
-                databaseReference.child("orderstatusmessage").setValue("Thankyou for ordering");
+                databaseReference.child("orderstatus").setValue("6");
+                databaseReference.child("orderstatusmessage").setValue("Thankyou for ordering!");
                 finish();
             }
         });
@@ -210,9 +230,9 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
                 .setTitleTextColor(R.color.colorPrimary)
                 .setDescriptionTextColor(R.color.gray)
                 .setHint("Please write your comment here...")
-                .setHintTextColor(R.color.colorAccent)
+                .setHintTextColor(R.color.gray)
                 .setCommentTextColor(R.color.colorPrimary)
-                .setCommentBackgroundColor(R.color.gray)
+                .setCommentBackgroundColor(R.color.gray_filter)
                 .setWindowAnimation(R.style.RatingDialogFadeAnim)
                 .create(RateActivity.this)
                 .show();
@@ -225,38 +245,36 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
         //get rating and upload to  firebase
 
 
-        value=values;
+        if(!comments.equalsIgnoreCase("")) {
+            value = values;
+            phone = sharedPreferences.getString("phone", "N/A");
+            name = sharedPreferences.getString("name", "N/A");
 
+            ratin = new Rating(name, comments, String.valueOf(value));
 
-        phone = sharedPreferences.getString("phone","N/A");
-        name = sharedPreferences.getString("name","N/A");
+            rating.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child(phone).exists()) {
+                        flag = 1;
+                        String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
+                        oldrating = Double.parseDouble(oldrat);
+                        updaterating();
+                    } else {
+                        flag = 0;
+                        updaterating();
+                    }
 
-        ratin = new Rating(name,comments,String.valueOf(value));
-
-        rating.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child(phone).exists())
-                {
-                    flag=1;
-                    String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
-                    oldrating = Double.parseDouble(oldrat);
-                    updaterating();
-                }
-                else
-                {
-                    flag=0;
-                    updaterating();
                 }
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                }
+            });
+        }
+        else
+            Toast.makeText(this, "Comment couldn't be empty!", Toast.LENGTH_SHORT).show();
 
     }
 

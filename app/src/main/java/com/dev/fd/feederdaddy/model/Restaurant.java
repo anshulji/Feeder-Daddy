@@ -2,12 +2,12 @@ package com.dev.fd.feederdaddy.model;
 
 public class Restaurant {
 
-    private String Name,Image,Veg,Nonveg,Latitude,Longitude,Rating,Totalrates,Isopen,id,Opentime,Isbakery;
+    private String Name,Image,Veg,Nonveg,Latitude,Longitude,Rating,Totalrates,Isopen,id,Opentime,Isbakery,Restaurantdiscount;
 
     public Restaurant() {
     }
 
-    public Restaurant(String name, String image, String veg, String nonveg, String latitude, String longitude, String rating, String totalrates, String isopen, String id, String opentime, String isbakery) {
+    public Restaurant(String name, String image, String veg, String nonveg, String latitude, String longitude, String rating, String totalrates, String isopen, String id, String opentime, String isbakery, String restaurantdiscount) {
         Name = name;
         Image = image;
         Veg = veg;
@@ -20,7 +20,7 @@ public class Restaurant {
         this.id = id;
         Opentime = opentime;
         Isbakery = isbakery;
-
+        Restaurantdiscount = restaurantdiscount;
     }
 
     public String getIsbakery() {
@@ -117,5 +117,13 @@ public class Restaurant {
 
     public void setImage(String image) {
         Image = image;
+    }
+
+    public String getRestaurantdiscount() {
+        return Restaurantdiscount;
+    }
+
+    public void setRestaurantdiscount(String restaurantdiscount) {
+        Restaurantdiscount = restaurantdiscount;
     }
 }

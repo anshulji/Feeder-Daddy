@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.dev.fd.feederdaddy.Database.Database;
@@ -29,7 +30,7 @@ import java.util.List;
 public class ViewBillActivity extends AppCompatActivity {
 
     ImageView imgrestimage,imggoback;
-    TextView txtrestname,txtuseraddress,txttotal,txtdeliverycharge;
+    TextView txtrestname,txtuseraddress,txttotal,txtdeliverycharge,txtsubltotal,txtpromocodename,txtpromocodeamount;
 
     RecyclerView rvbill;
 
@@ -40,6 +41,8 @@ public class ViewBillActivity extends AppCompatActivity {
 
     List<Order> orderlist  = new ArrayList<>();
     BillAdapter adapter;
+
+    LinearLayout llpromobill;
 
 
     @Override
@@ -75,6 +78,11 @@ public class ViewBillActivity extends AppCompatActivity {
         txttotal =findViewById(R.id.txttotalamount);
         txtdeliverycharge = findViewById(R.id.txtdeliverycharge);
 
+        llpromobill = findViewById(R.id.llbillpromo);
+        txtsubltotal = findViewById(R.id.txtsubtotal);
+        txtpromocodename = findViewById(R.id.txtbillpromoname);
+        txtpromocodeamount = findViewById(R.id.txtpromoamount);
+
         imggoback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +98,17 @@ public class ViewBillActivity extends AppCompatActivity {
                 txtdeliverycharge.setText("₹"+dataSnapshot.child("deliverycharge").getValue().toString());
                 txtuseraddress.setText(dataSnapshot.child("customeraddress").getValue().toString());
                 txttotal.setText("₹"+dataSnapshot.child("totalamount").getValue().toString());
+                if(!dataSnapshot.child("promocode").getValue().toString().equals("null"))
+                {
+                    llpromobill.setVisibility(View.VISIBLE);
+                    txtpromocodename.setText(dataSnapshot.child("promocode").getValue().toString());
+                    txtpromocodeamount.setText("-₹"+dataSnapshot.child("promoamount").getValue().toString());
+                    int totalamnt = Integer.parseInt(dataSnapshot.child("totalamount").getValue().toString());
+                    int promoamnt = Integer.parseInt(dataSnapshot.child("promoamount").getValue().toString());
+                    int deliverycharge = Integer.parseInt(dataSnapshot.child("deliverycharge").getValue().toString());
+                    int subtotal = totalamnt-deliverycharge+promoamnt;
+                    txtsubltotal.setText("₹"+subtotal);
+                }
 
                 for(DataSnapshot postSnapshot : dataSnapshot.child("foods").getChildren())
                 {

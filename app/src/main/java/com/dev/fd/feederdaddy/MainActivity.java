@@ -1,7 +1,9 @@
 package com.dev.fd.feederdaddy;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -26,12 +28,14 @@ import android.widget.TextView;
 import com.dev.fd.feederdaddy.Common.Common;
 import com.dev.fd.feederdaddy.Database.Database;
 import com.dev.fd.feederdaddy.Service.ListenOrder;
+import com.dev.fd.feederdaddy.model.Token;
 import com.google.android.gms.signin.SignIn;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Calendar;
 
@@ -55,12 +59,16 @@ public class MainActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
 
-
+        if(getIntent().getStringExtra("FCM")!=null)
+        {
+            Intent intent = new Intent(MainActivity.this,Orders.class);
+            startActivity(intent);
+        }
 
         //init firebase
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference  = firebaseDatabase.getReference("AppVersion");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(!AppVersion.equals(dataSnapshot.getValue().toString()))
@@ -141,7 +149,49 @@ public class MainActivity extends AppCompatActivity {
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) bottomNavigationView.getLayoutParams();
         layoutParams.setBehavior(new BottomNavigationViewBehavior());
 
+        updateToken(FirebaseInstanceId.getInstance().getToken());
 
+
+    }
+
+    private void updateToken(String token) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference("Tokens");
+
+        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
+        String phone = sharedPreferences.getString("phone","N/A");
+        String city = sharedPreferences.getString("city","N/A");
+        String zone = sharedPreferences.getString("zone","N/A");
+
+
+        Token data = new Token(token,city+zone+"0");
+        tokens.child(phone).setValue(data);
+    }
+
+    public void refreshordermeal()
+    {
+        if(Common.currentfragment.equals("ordermeal"))
+        {
+            bottomNavigationView.setSelectedItemId(R.id.ordermeal);
+            getSupportFragmentManager().beginTransaction().replace(R.id.contentofmainactivity,new OrderMeal()).commit();
+        }
+        else
+        {
+            bottomNavigationView.setSelectedItemId(R.id.bakery);
+            getSupportFragmentManager().beginTransaction().replace(R.id.contentofmainactivity,new OrderMeal()).commit();
+        }
+    }
+
+    public void refreshhotdeals()
+    {
+        bottomNavigationView.setSelectedItemId(R.id.hotdeals);
+        getSupportFragmentManager().beginTransaction().replace(R.id.contentofmainactivity,new HotDeals()).commit();
+    }
+
+    public void refreshnightorders()
+    {
+        bottomNavigationView.setSelectedItemId(R.id.nightorders);
+        getSupportFragmentManager().beginTransaction().replace(R.id.contentofmainactivity,new NightOrdersActivity()).commit();
     }
 
     public void hidebottomnavigationbar()

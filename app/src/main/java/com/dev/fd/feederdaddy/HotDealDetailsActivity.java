@@ -129,7 +129,7 @@ public class HotDealDetailsActivity extends AppCompatActivity {
                             FoodId,
                             currentFood.getName(),
                             numberButton.getNumber(),
-                            currentFood.getPrice(),
+                            currentFood.getFullprice(),
                             currentFood.getImage(),
                             "-1",
                             "0"
@@ -176,7 +176,7 @@ public class HotDealDetailsActivity extends AppCompatActivity {
                     imgnonveg.setVisibility(View.VISIBLE);
 
                 collapsingToolbarLayout.setTitle(currentFood.getName());
-                food_price.setText("₹"+currentFood.getPrice());
+                food_price.setText("₹"+currentFood.getFullprice());
                 food_name.setText(currentFood.getName());
                 food_description.setText(currentFood.getDescription());
             }

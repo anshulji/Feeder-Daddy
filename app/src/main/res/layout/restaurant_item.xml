@@ -50,6 +50,25 @@
             android:backgroundTint="@android:color/holo_red_light"
 
             />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/restdiscount_bg"
+            android:text="20% OFF"
+            android:visibility="gone"
+            android:textStyle="bold"
+            android:textSize="15dp"
+            android:id="@+id/txtrestdiscount"
+            android:textColor="@android:color/white"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="15dp"
+            android:backgroundTint="@android:color/holo_green_dark"
+
+            />
+
         <RatingBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

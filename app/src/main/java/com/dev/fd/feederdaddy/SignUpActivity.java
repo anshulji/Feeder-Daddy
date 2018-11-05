@@ -30,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -113,6 +114,10 @@ public class SignUpActivity extends AppCompatActivity {
     private String city,zone;
     private boolean isCheckBoxTicked=true;
 
+    GpsLocationTracker mGpsLocationTracker;
+
+    LocationManager mLocationManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,12 +127,10 @@ public class SignUpActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
         firebaseDatabase = FirebaseDatabase.getInstance();
-
         databaseReference = firebaseDatabase.getReference("Cities");
 
         cityspinner = findViewById(R.id.spinner);
         zonespinner = findViewById(R.id.spinnerzone);
-
 
         edtverificationcode = findViewById(R.id.edtverificationcode);
         txtresendotp = findViewById(R.id.txtresendotp);
@@ -138,7 +141,8 @@ public class SignUpActivity extends AppCompatActivity {
         edthostelname = findViewById(R.id.edthostelname);
         edtlandmark = findViewById(R.id.edtlandmark);
 
-        // Spinner Drop down elements
+
+// Spinner Drop down elements
         final List<String> categories = new ArrayList<String>();
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -213,8 +217,6 @@ public class SignUpActivity extends AppCompatActivity {
 
             }
         });
-
-
 
 
 
@@ -398,10 +400,10 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-        checkBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!checkBox.isChecked()) {
+      /*checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+               if (!isChecked) {
                     edtAddress.setText("");
                     addressassigned="";
                    // currentAddtv.setText("");
@@ -415,24 +417,61 @@ public class SignUpActivity extends AppCompatActivity {
                         }
                         else
                         {enableGPS();
-                         getDevicelocation();
+                            checkBox.setChecked(false);
                         }
                     }
                     else
                     { getLocationPermission();
-                        enableGPS();
-                        getDevicelocation();
+                        checkBox.setChecked(false);
                     }
 
-                    if(latitude==0)
-                        checkBox.setChecked(false);
+
+                }
+            }
+        });*/
+
+        mGpsLocationTracker = new GpsLocationTracker(SignUpActivity.this);
+
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                {
+                    /**
+                     * Set GPS Location fetched address
+                     */
+                    if (!isChecked) {
+                        edtAddress.setText("");
+                        addressassigned="";
+                        // currentAddtv.setText("");
+                    } else {
+
+                        if(mLocationPermissionsGranted) {
+                            boolean isGPSEnabled = false;
+                            isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                            if(isGPSEnabled) {
+                                getDevicelocation();
+                            }
+
+                            else
+                            {enableGPS();
+                                checkBox.setChecked(false);
+                            }
+                        }
+                        else
+                        { getLocationPermission();
+                            checkBox.setChecked(false);
+                        }
+                    }
 
                 }
             }
         });
 
 
+
     }
+
     private void getDevicelocation(){
         Log.d(TAG, "getDevicelocation: getting the device's current location");
 
@@ -446,6 +485,7 @@ public class SignUpActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task task) {
                         if(task.isSuccessful()){
                             Log.d(TAG, "onComplete: Found Location");
+
                             Location currentLocation = (Location) task.getResult();
 
                             if(currentLocation!=null) {
@@ -453,7 +493,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 longitude = currentLocation.getLongitude();
 
 
-                                // Toast.makeText(SignUpActivity.this ,"address:"+latitude+" "+longitude,Toast.LENGTH_SHORT).show();
+                                 //Toast.makeText(SignUpActivity.this ,"address:"+latitude+" "+longitude,Toast.LENGTH_SHORT).show();
 
                                 List<Address> addresses = new ArrayList<>();
                                 try {
@@ -462,12 +502,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
 
-                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                //city = addresses.get(0).getLocality();
-                                String state = addresses.get(0).getAdminArea();
-                                String country = addresses.get(0).getCountryName();
-                                String postalCode = addresses.get(0).getPostalCode();
-                                String knownName = addresses.get(0).getFeatureName();
+                                String address = addresses.get(0).getAddressLine(0);
                                 for (int i = 0; i < address.length(); i++) {
                                     if (address.substring(i, i + 5).equals("India")) {
                                         address = address.substring(0, i + 5);
@@ -477,13 +512,17 @@ public class SignUpActivity extends AppCompatActivity {
                                 edtAddress.setText(address);
                                 addressassigned=address;
                                 //currentAddtv.setText(address);
-                                checkBox.setChecked(true);
                             }
-
+                            else
+                            {
+                                Toast.makeText(SignUpActivity.this, "Unable to detect your location !", Toast.LENGTH_SHORT).show();
+                                checkBox.setChecked(false);
+                            }
 
                         }else{
                             Log.d(TAG, "onComplete: Current location is null");
                             Toast.makeText(SignUpActivity.this, "Unable to detect your location !", Toast.LENGTH_SHORT).show();
+                            checkBox.setChecked(false);
                         }
 
                     }
@@ -596,9 +635,9 @@ public class SignUpActivity extends AppCompatActivity {
                             rlenteraddress.setVisibility(View.VISIBLE);
 
                             if(isServicesOK())
-                            {   getLocationPermission();
+                            {   /*getLocationPermission();
                                 enableGPS();
-                                getDevicelocation();
+                                getDevicelocation();*/
                             }
 
                         } else {
@@ -611,6 +650,7 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
     private void enableGPS() {
 

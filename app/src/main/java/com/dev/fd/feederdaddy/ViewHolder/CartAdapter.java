@@ -88,6 +88,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartViewHolder>{
         int price = (Integer.parseInt(listData.get(i).getPrice())*Integer.parseInt(listData.get(i).getQuantity()));
         cartViewHolder.txt_price.setText("₹"+price);
         cartViewHolder.txt_cart_name.setText(listData.get(i).getFoodname());
+        String col =  String.valueOf(listData.get(i).getID());
+        cartViewHolder.txt_cart_name.setTextColor(Color.parseColor("#"+col.substring(4,5)+"F"+col.substring(0,4)));
 
         cartViewHolder.imgremovefood.setOnClickListener(new View.OnClickListener() {
             @Override

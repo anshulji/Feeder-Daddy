@@ -1,17 +1,17 @@
 package com.dev.fd.feederdaddy.model;
 
 public class HotDeal {
-    private String Name,Image,Description,Price,Veg,Nonveg;
+    private String Name,Image,Description,Fullprice,Veg,Nonveg;
 
     public HotDeal(){
 
     }
 
-    public HotDeal(String name, String image, String description, String price, String veg, String nonveg) {
+    public HotDeal(String name, String image, String description, String fullprice, String veg, String nonveg) {
         Name = name;
         Image = image;
         Description = description;
-        Price = price;
+        Fullprice = fullprice;
         Veg = veg;
         Nonveg = nonveg;
     }
@@ -56,12 +56,11 @@ public class HotDeal {
         Description = description;
     }
 
-    public String getPrice() {
-        return Price;
+    public String getFullprice() {
+        return Fullprice;
     }
 
-    public void setPrice(String price) {
-        Price = price;
+    public void setFullprice(String fullprice) {
+        Fullprice = fullprice;
     }
-
 }

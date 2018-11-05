@@ -17,6 +17,7 @@ public class RateFoodViewHolder extends RecyclerView.ViewHolder
 
     public ImageView imgratebtn;
     public TextView txtfoodname;
+    public RelativeLayout rlview;
 
     private ItemClickListener itemClickListener;
 
@@ -26,6 +27,7 @@ public class RateFoodViewHolder extends RecyclerView.ViewHolder
 
         imgratebtn = itemView.findViewById(R.id.imgrate);
         txtfoodname = itemView.findViewById(R.id.food_name);
+        rlview = itemView.findViewById(R.id.view_foreground);
 
         //itemView.setOnClickListener(this);
 

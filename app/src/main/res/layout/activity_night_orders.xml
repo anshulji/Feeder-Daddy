@@ -51,13 +51,18 @@
                 />
 
 
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:layout_width="match_parent"
+                android:id="@+id/pulltorefreshhome"
+                android:layout_below="@+id/toolbar"
+                android:layout_height="wrap_content">
+
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/toolbar"
                 android:id="@+id/recycler_hotdeals"
                 />
-
+            </android.support.v4.widget.SwipeRefreshLayout>
             <RelativeLayout
                 android:layout_width="80dp"
                 android:layout_height="80dp"

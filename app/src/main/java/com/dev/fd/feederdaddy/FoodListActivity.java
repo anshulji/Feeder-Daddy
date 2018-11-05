@@ -1,12 +1,16 @@
 package com.dev.fd.feederdaddy;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -123,10 +127,38 @@ public class FoodListActivity extends AppCompatActivity {
                 }
 
                 @Override
-                protected void populateViewHolder(FoodViewHolder viewHolder, Food model, int position) {
+                protected void populateViewHolder(final FoodViewHolder viewHolder, Food model, int position) {
                     Typeface face = Typeface.createFromAsset(getAssets(),"NABILA.TTF");
-                    viewHolder.food_name.setTypeface(face);
                     viewHolder.food_price.setText("₹ "+model.getFullprice());
+
+
+                    foodlist.child(adapter.getRef(position).getKey()).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.child("hidefood").getValue()!=null)
+                            {
+                                    int color = R.color.black_filter;
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        viewHolder.food_image.setForeground(new ColorDrawable(ContextCompat.getColor(getBaseContext(), color)));
+                                    }
+                                    viewHolder.food_price.setText("Out of Stock");
+                            }
+                            else
+                            {
+                                int color = R.color.gray_filter;
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    viewHolder.food_image.setForeground(new ColorDrawable(ContextCompat.getColor(getBaseContext(), color)));
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    viewHolder.food_name.setTypeface(face);
                     viewHolder.food_name.setText(model.getName());
                     Picasso.with(getBaseContext()).load(model.getImage()).into(viewHolder.food_image);
                     Double drating = Double.parseDouble(model.getRating());
@@ -152,11 +184,22 @@ public class FoodListActivity extends AppCompatActivity {
                             // Toast.makeText(FoodList.this, ""+local.getName(), Toast.LENGTH_SHORT).show();
 
                             //start food details activity
+
+                            //start food details activity
                             Intent fooddetail = new Intent(FoodListActivity.this,FoodDetails.class);
+                            fooddetail.putExtra("comeback","yes");
                             fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
                             fooddetail.putExtra("RestaurantId",RestaurantId);
                             fooddetail.putExtra("MenuId", MenuId);
-                            startActivity(fooddetail);
+                            if(viewHolder.food_price.getText().equals("Out of Stock"))
+                            {
+                                fooddetail.putExtra("isoutofstock","1");
+                            }
+                            else
+                            {
+                                fooddetail.putExtra("isoutofstock","0");
+                            }
+                            startActivityForResult(fooddetail,1);
                         }
                     });
 
@@ -197,7 +240,7 @@ public class FoodListActivity extends AppCompatActivity {
         loadSuggest();
 
         materialSearchBar.setLastSuggestions(SuggestList);
-        materialSearchBar.setCardViewElevation(10);
+        materialSearchBar.setCardViewElevation(0);
         materialSearchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -244,6 +287,15 @@ public class FoodListActivity extends AppCompatActivity {
             }
         });
 
+        final SwipeRefreshLayout pulltorefreshhome = findViewById(R.id.pulltorefreshhome);
+
+        pulltorefreshhome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                startActivity(getIntent());
+                finish();
+            }
+        });
 
 
     }
@@ -303,10 +355,11 @@ public class FoodListActivity extends AppCompatActivity {
 
                         //start food details activity
                         Intent fooddetail = new Intent(FoodListActivity.this,FoodDetails.class);
+                        fooddetail.putExtra("comeback","yes");
                         fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
                         fooddetail.putExtra("RestaurantId",RestaurantId);
                         fooddetail.putExtra("MenuId", MenuId);
-                        startActivity(fooddetail);
+                        startActivityForResult(fooddetail,1);
                     }
                 });
             }
@@ -318,7 +371,7 @@ public class FoodListActivity extends AppCompatActivity {
 
 
     private void loadSuggest() {
-        foodlist.addListenerForSingleValueEvent(new ValueEventListener() {
+        foodlist.orderByChild("hidefood").equalTo(null).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         for(DataSnapshot postSnaphot : dataSnapshot.getChildren())
@@ -360,6 +413,24 @@ public class FoodListActivity extends AppCompatActivity {
         if(recyclerView!=null  && recyclerView.getAdapter()!=null) {
             recyclerView.getAdapter().notifyDataSetChanged();
             recyclerView.scheduleLayoutAnimation();
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                String result=data.getStringExtra("result");
+                if(result.equals("1"))
+                {
+                    finish();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
         }
     }
 

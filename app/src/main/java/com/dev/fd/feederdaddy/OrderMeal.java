@@ -19,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,6 +64,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -94,7 +98,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     String isbakerystr,city;
 
     SharedPreferences sharedPreferences;
-    public static String phone,userlatitude,userlongitude,deliverycharges;
+    public static String phone,userlatitude,userlongitude,deliverycharges,mindeliverycharge,mindcdistance;
 
     //slider
     HashMap<String, String> image_list;
@@ -116,24 +120,17 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sharedPreferences = this.getActivity().getSharedPreferences("MyData", Context.MODE_PRIVATE);
 
+        final SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyData",Context.MODE_PRIVATE);
         city = sharedPreferences.getString("city","N/A");
-
-        ConnectivityManager cm =
-                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
 
         TextView txtcallorwhatsapp = view.findViewById(R.id.txtcallorwhatsapp);
         progressBar = view.findViewById(R.id.progressbar);
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.sortby_menu);
 
-        drawer = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+        drawer = view.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this.getActivity(), drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -151,7 +148,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             }
         };
 
-
         drawer.addDrawerListener(toggle);
 
         toggle.syncState();
@@ -161,14 +157,14 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             }
         }
 
-        NavigationView navigationView = (NavigationView) view.findViewById(R.id.nav_view);
+        NavigationView navigationView = view.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //set name for user
-        View headerview = navigationView.getHeaderView(0);
+        /*//set name for user
+        View headerview = navigationView.getHeaderView(0);*/
 
 
-        if(isConnected) {
+        if(Common.isConnectedToInternet(getActivity())) {
 
             if (Common.currentfragment.equals("bakery"))
                 isbakerystr = "1";
@@ -186,10 +182,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             userlatitude = sharedPreferences.getString("latitude", "0.0");
             userlongitude = sharedPreferences.getString("longitude", "0.0");
 
-
-            //setSupportActionBar(toolbar);
-
-
             // load menu
             recylermenu = view.findViewById(R.id.recycler_menu);
             recylermenu.setHasFixedSize(true);
@@ -199,34 +191,31 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                     R.anim.layout_slide_right);
             recylermenu.setLayoutAnimation(controller);
 
-            //loadRestaurants();
-
-
-            //regiuster service
-            //Intent i = new Intent(Home.this,ListenOrder.class);
-            //startService(i);
 
             refdelivercharges = database.getReference(city).child("DeliveryCharges");
-            refdelivercharges.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            refdelivercharges.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    deliverycharges = dataSnapshot.getValue().toString();
+                    deliverycharges = dataSnapshot.child("deliverychargeperkm").getValue().toString();
+                    mindeliverycharge = dataSnapshot.child("mindeliverycharge").getValue().toString();
+                    mindcdistance = dataSnapshot.child("mindcdistance").getValue().toString();
+
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("deliveryrate",deliverycharges);
+                    editor.putString("mindeliverycharge",mindeliverycharge);
+                    editor.putString("mindcdistance",mindcdistance);
                     editor.commit();
-
-                    //loadRestaurantlist();
-
 
                     //load restlist
                     if (progressBar != null) {
                         progressBar.setVisibility(View.VISIBLE);
                     }
 
-
-                    restaurant.orderByChild("isbakery").equalTo(isbakerystr).addListenerForSingleValueEvent(new ValueEventListener() {
+                    restaurant.orderByChild("isbakery").equalTo(isbakerystr).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            restaurantList.clear();
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 Restaurant res = postSnapshot.getValue(Restaurant.class);
                                 restaurantList.add(res);
@@ -244,7 +233,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                             loadSuggest();
 
                             materialSearchBar.setLastSuggestions(SuggestList);
-                            materialSearchBar.setCardViewElevation(10);
+                            materialSearchBar.setCardViewElevation(0);
                             materialSearchBar.addTextChangeListener(new TextWatcher() {
                                 @Override
                                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -267,6 +256,24 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
                                 }
                             });
+
+
+                            materialSearchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+                                @Override
+                                public void OnItemClickListener(int position, View v) {
+                                    startSearch(SuggestList.get(position));
+                                    materialSearchBar.hideSuggestionsList();
+                                    materialSearchBar.setText(SuggestList.get(position));
+                                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                                }
+
+                                @Override
+                                public void OnItemDeleteListener(int position, View v) {
+
+                                }
+                            });
+
                             materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
                                 @Override
                                 public void onSearchStateChanged(boolean enabled) {
@@ -382,25 +389,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                         recylermenu.setAdapter(restaurantAdapter);
                         return true;
                     }
-                    /*if (id == R.id.deliverycost) {
-                        Collections.sort(HotDealsList, new Comparator<Restaurant>() {
-
-                            @Override
-                            public int compare(Restaurant r1, Restaurant r2) {
-
-                                Double distance1 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r1.getLatitude()), Double.parseDouble(r1.getLongitude()));
-                                Double distance2 = getDistanceFromLatLonInKm(Double.parseDouble(OrderMeal.userlatitude), Double.parseDouble(userlongitude), Double.parseDouble(r2.getLatitude()), Double.parseDouble(r2.getLongitude()));
-                                String dist1 = String.format("%.2f", distance1);
-                                String dist2 = String.format("%.2f", distance2);
-
-                                return (dist1).compareTo(dist2);
-                            }
-                        });
-
-                        restaurantAdapter = new RestaurantAdapter(HotDealsList, OrderMeal.this.getActivity());
-                        recylermenu.setAdapter(restaurantAdapter);
-                        return true;
-                    }*/
 
                     return true;
                 }
@@ -408,22 +396,27 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
             ((MainActivity) getActivity()).bottomNavigationView.setTranslationY(0);
 
-
             sliderLayout = view.findViewById(R.id.slidermenu);
             sliderLayout.setVisibility(View.INVISIBLE);
             setupSlider();
-
-
 
         }
         else
         {
             progressBar.setVisibility(View.GONE);
             txtcallorwhatsapp.setVisibility(View.VISIBLE);
-
-
             Toast.makeText(getActivity(), "Please Check Your Internet !", Toast.LENGTH_SHORT).show();
         }
+        final SwipeRefreshLayout pulltorefreshhome = view.findViewById(R.id.pulltorefreshhome);
+
+        pulltorefreshhome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                ((MainActivity) getActivity()).refreshordermeal();
+                    /*startActivity(getActivity().getIntent());
+                    getActivity().finish();*/
+            }
+        });
 
 
     }
@@ -434,7 +427,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
         DatabaseReference menubannerref = database.getReference(city).child("FeederDaddyBanner");
 
-        menubannerref.addListenerForSingleValueEvent(new ValueEventListener() {
+        menubannerref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -583,9 +576,10 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         }
 
         searchedList.clear();
-        restaurant.orderByChild("name").equalTo(text.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+        restaurant.orderByChild("name").equalTo(text.toString()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                searchedList.clear();
                 for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
                 {
                     Restaurant res = postSnapshot.getValue(Restaurant.class);
@@ -600,11 +594,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                 }
 
                 recylermenu.setAdapter(searchAdapter);
-//                animation
-//                recylermenu.getAdapter().notifyDataSetChanged();
-//                recylermenu.scheduleLayoutAnimation();
-
-
 
             }
 
@@ -632,7 +621,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         }
     }
 
-    private void loadRestaurantlist() {
+    /*private void loadRestaurantlist() {
         if (progressBar != null) {
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -715,7 +704,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
 
 
-    }
+    }*/
 
    /* private void loadRestaurants() {
         Query query = NightOrdersRef.orderByChild("name"); // or ...orderByChild("username");
@@ -962,6 +951,24 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             Intent i = new Intent(getActivity(),FeedbackActivity.class);
             //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
+        }
+        else if (id == R.id.nav_eventcatering) {
+            Intent i = new Intent(getActivity(),EventCateringActivity.class);
+            //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        }
+        else if (id == R.id.nav_logout) {
+
+            sharedPreferences = getActivity().getSharedPreferences("MyData",Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("phone","N/A");
+            editor.commit();
+
+            Intent i = new Intent(getActivity(),SplashActivity.class);
+
+            //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            getActivity().finish();
         }
         drawer.closeDrawer(GravityCompat.START);
 
