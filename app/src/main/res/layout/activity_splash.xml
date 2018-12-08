@@ -29,8 +29,7 @@
         <ImageView
             android:layout_width="150dp"
             android:layout_centerInParent="true"
-            android:layout_height="152dp"
-            android:scaleType="fitXY"
+            android:layout_height="150dp"
             android:src="@drawable/feeder_daddy_logo"
             />
         </RelativeLayout>
@@ -51,7 +50,7 @@
                 android:id="@+id/txtsignuphere"
                 android:fontFamily="sans-serif-medium"
                 android:text="Sign Up"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textSize="30dp"
                 />
             <LinearLayout
@@ -71,12 +70,12 @@
                         android:text="Username"
                         android:textAllCaps="true"
                         android:textSize="15dp"
-                        android:textColor="@android:color/white"
+                        android:textColor="@android:color/black"
                         />
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@android:color/white"
+                        android:textColor="@android:color/black"
                         android:id="@+id/edtusername"
                         android:layout_marginTop="5dp"
                         android:fontFamily="sans-serif-light"
@@ -84,7 +83,7 @@
                         android:inputType="textPersonName"
                         android:paddingHorizontal="15dp"
                         android:textSize="20dp"
-                        android:background="@drawable/et_bg_1"
+                        android:background="@drawable/et_bg"
                         />
                 </LinearLayout>
 
@@ -99,20 +98,20 @@
                         android:text="Phone Number"
                         android:textAllCaps="true"
                         android:textSize="15dp"
-                        android:textColor="@android:color/white"
+                        android:textColor="@android:color/black"
                         />
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/edtphone"
-                        android:textColor="@android:color/white"
+                        android:textColor="@android:color/black"
                         android:layout_marginTop="5dp"
                         android:paddingVertical="5dp"
                         android:fontFamily="sans-serif-light"
                         android:inputType="phone"
                         android:paddingHorizontal="15dp"
                         android:textSize="20dp"
-                        android:background="@drawable/et_bg_1"
+                        android:background="@drawable/et_bg"
                         />
                 </LinearLayout>
 
@@ -124,21 +123,18 @@
                 android:layout_marginTop="50dp"
                 android:text="Send OTP"
                 android:textAllCaps="false"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:id="@+id/btnsendotp"
                 android:fontFamily="sans-serif-medium"
                 android:paddingHorizontal="70dp"
                 android:layout_centerHorizontal="true"
                 android:textSize="16dp"
-                android:background="@drawable/bt_bg_1"
+                android:background="@drawable/bt_bg"
 
                 />
 
 
         </RelativeLayout>
-
-
-
 
     </RelativeLayout>
     </ScrollView>

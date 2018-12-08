@@ -374,11 +374,13 @@ public class FoodListActivity extends AppCompatActivity {
         foodlist.orderByChild("hidefood").equalTo(null).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for(DataSnapshot postSnaphot : dataSnapshot.getChildren())
-                        {
-                            Food item = postSnaphot.getValue(Food.class);
-                            SuggestList.add(item.getName());
+                        if(dataSnapshot.getValue()!=null) {
 
+                            for (DataSnapshot postSnaphot : dataSnapshot.getChildren()) {
+                                Food item = postSnaphot.getValue(Food.class);
+                                SuggestList.add(item.getName());
+
+                            }
                         }
                     }
 

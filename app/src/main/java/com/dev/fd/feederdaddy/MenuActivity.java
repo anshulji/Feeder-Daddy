@@ -315,56 +315,56 @@ public class MenuActivity extends AppCompatActivity {
 
         DatabaseReference menubannerref = database.getReference(city).child("RestaurantBanner").child(RestaurantId);
 
-        menubannerref.addListenerForSingleValueEvent(new ValueEventListener() {
+        menubannerref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!=null) {
 
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
-                {
-                    RestaurantBanner banner = postSnapshot.getValue(RestaurantBanner.class);
 
-                    // we will concat string name and id
-                    image_list.put(banner.getName()+"@#@"+banner.getRestaurantid()+"@#@"+banner.getMenuid()+"@#@"+banner.getFoodid(),banner.getImage());
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        RestaurantBanner banner = postSnapshot.getValue(RestaurantBanner.class);
 
+                        // we will concat string name and id
+                        image_list.put(banner.getName() + "@#@" + banner.getRestaurantid() + "@#@" + banner.getMenuid() + "@#@" + banner.getFoodid(), banner.getImage());
+
+                    }
+                    for (String key : image_list.keySet()) {
+                        String[] keySplit = key.split("@#@");
+                        String nameoffood = keySplit[0];
+                        final String restaurantid = keySplit[1];
+                        final String menuid = keySplit[2];
+                        final String foodid = keySplit[3];
+
+                        //create slider
+                        TextSliderView textSliderView = new TextSliderView(getBaseContext());
+                        textSliderView.description(nameoffood)
+                                .image(image_list.get(key))
+                                .setScaleType(BaseSliderView.ScaleType.CenterCrop)
+                                .setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
+                                    @Override
+                                    public void onSliderClick(BaseSliderView slider) {
+                                        Intent intent = new Intent(MenuActivity.this, FoodDetails.class);
+
+                                        //we will start food details activity by sending intent extras
+                                        intent.putExtra("comeback", "yes");
+                                        intent.putExtra("RestaurantId", restaurantid);
+                                        intent.putExtra("MenuId", menuid);
+                                        intent.putExtra("FoodId", foodid);
+                                        startActivity(intent);
+
+                                    }
+                                });
+
+                        sliderLayout.addSlider(textSliderView);
+                    }
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sliderLayout.setVisibility(View.VISIBLE);
+                            sliderLayout.startAutoCycle();
+                        }
+                    }, 0);
                 }
-                for (String key: image_list.keySet())
-                {
-                    String[] keySplit = key.split("@#@");
-                    String nameoffood = keySplit[0];
-                    final String restaurantid = keySplit[1];
-                    final String menuid = keySplit[2];
-                    final String foodid = keySplit[3];
-
-                    //create slider
-                    TextSliderView textSliderView =new TextSliderView(getBaseContext());
-                    textSliderView.description(nameoffood)
-                            .image(image_list.get(key))
-                            .setScaleType(BaseSliderView.ScaleType.Fit)
-                            .setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
-                                @Override
-                                public void onSliderClick(BaseSliderView slider) {
-                                    Intent intent = new Intent(MenuActivity.this,FoodDetails.class);
-
-                                    //we will start food details activity by sending intent extras
-                                    intent.putExtra("comeback","yes");
-                                    intent.putExtra("RestaurantId",restaurantid);
-                                    intent.putExtra("MenuId",menuid);
-                                    intent.putExtra("FoodId",foodid);
-                                    startActivity(intent);
-
-                                }
-                            });
-
-                    sliderLayout.addSlider(textSliderView);
-                    }
-                new Handler().postDelayed(new Runnable(){
-                    @Override
-                    public void run() {
-                        sliderLayout.setVisibility(View.VISIBLE);
-                        sliderLayout.startAutoCycle();
-                    }
-                }, 0);
-
             }
 
             @Override
@@ -450,11 +450,13 @@ public class MenuActivity extends AppCompatActivity {
         menulist.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for(DataSnapshot postSnaphot : dataSnapshot.getChildren())
-                        {
-                            Menu item = postSnaphot.getValue(Menu.class);
-                            SuggestList.add(item.getName());
+                        if(dataSnapshot.getValue()!=null) {
 
+                            for (DataSnapshot postSnaphot : dataSnapshot.getChildren()) {
+                                Menu item = postSnaphot.getValue(Menu.class);
+                                SuggestList.add(item.getName());
+
+                            }
                         }
                     }
 

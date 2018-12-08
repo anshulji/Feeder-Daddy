@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "872034457348",
-    "firebase_url": "https://feeder-daddy.firebaseio.com",
-    "project_id": "feeder-daddy",
-    "storage_bucket": "feeder-daddy.appspot.com"
+    "project_number": "819397674940",
+    "firebase_url": "https://feeder-daddy-app.firebaseio.com",
+    "project_id": "feeder-daddy-app",
+    "storage_bucket": "feeder-daddy-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:872034457348:android:c6cd92c167c8b66e",
+        "mobilesdk_app_id": "1:819397674940:android:c6cd92c167c8b66e",
         "android_client_info": {
           "package_name": "com.dev.fd.feederdaddy"
         }
       },
       "oauth_client": [
         {
-          "client_id": "872034457348-3qa2nj0baqked7sjl901g08qgmf4u6fi.apps.googleusercontent.com",
+          "client_id": "819397674940-cjeu6acuv8hqqj0blvf9umd75dv5cfgr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.dev.fd.feederdaddy",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "872034457348-di24nn3fehh81pnpbvv3lv9m6k87rp88.apps.googleusercontent.com",
+          "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyASBa85l892VYkLRgUbwc8uH_KxFaDeddY"
+          "current_key": "AIzaSyBUbC6mJnv4ARknFAbYMInZr-d5zsPMcFU"
         }
       ],
       "services": {
@@ -40,7 +40,139 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "872034457348-di24nn3fehh81pnpbvv3lv9m6k87rp88.apps.googleusercontent.com",
+              "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819397674940:android:c373efea370127e5",
+        "android_client_info": {
+          "package_name": "com.dev.fd.feederdaddyadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819397674940-nsbr1edm0vgamb3abv64iqf5e30e3796.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dev.fd.feederdaddyadmin",
+            "certificate_hash": "5e6153f00c2c6f2ab6f322e175803b78e8b7c034"
+          }
+        },
+        {
+          "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUbC6mJnv4ARknFAbYMInZr-d5zsPMcFU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819397674940:android:9e79debd018edbb9",
+        "android_client_info": {
+          "package_name": "com.dev.fd.feederdaddydeliveryboy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819397674940-a7t57pd0lppt7kbkp4683rucmpfh264h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dev.fd.feederdaddydeliveryboy",
+            "certificate_hash": "5e6153f00c2c6f2ab6f322e175803b78e8b7c034"
+          }
+        },
+        {
+          "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUbC6mJnv4ARknFAbYMInZr-d5zsPMcFU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819397674940:android:999e74515483a8d8",
+        "android_client_info": {
+          "package_name": "com.dev.fd.feederdaddyrest.model"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819397674940-lld7rlgvtf5vjv9m181i2bducjsofafu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dev.fd.feederdaddyrest.model",
+            "certificate_hash": "5e6153f00c2c6f2ab6f322e175803b78e8b7c034"
+          }
+        },
+        {
+          "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUbC6mJnv4ARknFAbYMInZr-d5zsPMcFU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819397674940-ugapmp9ed6ht6ighk7c2jha9uf7n1hsv.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -172,10 +172,15 @@ public class Orders extends AppCompatActivity {
                     viewHolder.btnrate.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            //something to do
-                            Intent rate = new Intent(Orders.this, RateActivity.class);
-                            rate.putExtra("rate",adapter.getRef(position).getKey());
-                            startActivity(rate);
+
+                            if(Common.isConnectedToInternet(getBaseContext())) {
+                                //something to do
+                                Intent rate = new Intent(Orders.this, RateActivity.class);
+                                rate.putExtra("rate",adapter.getRef(position).getKey());
+                                startActivity(rate);
+                            }
+                            else
+                                Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
 
                         }
                     });

@@ -57,21 +57,25 @@ public class FeedbackActivity extends AppCompatActivity {
         btnfeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!etfeedback.getText().toString().equals(""))
-                {
-                    String key = databaseReference.push().getKey();
+                if(Common.isConnectedToInternet(getBaseContext())) {
+                    if(!etfeedback.getText().toString().equals(""))
+                    {
+                        String key = databaseReference.push().getKey();
 
-                    databaseReference.child(key).child("userphone").setValue(phone);
-                    databaseReference.child(key).child("feedback").setValue(etfeedback.getText().toString());
+                        databaseReference.child(key).child("userphone").setValue(phone);
+                        databaseReference.child(key).child("feedback").setValue(etfeedback.getText().toString());
 
-                    Calendar mcurrentTime = Calendar.getInstance();
-                    long currenttime = mcurrentTime.getTimeInMillis();
-                    databaseReference.child(key).child("datetimeoffeedback").setValue(Common.getDate(currenttime));
+                        Calendar mcurrentTime = Calendar.getInstance();
+                        long currenttime = mcurrentTime.getTimeInMillis();
+                        databaseReference.child(key).child("datetimeoffeedback").setValue(Common.getDate(currenttime));
 
-                    Toast.makeText(FeedbackActivity.this, "Your feedback submited successfully !", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FeedbackActivity.this, "Your feedback submited successfully !", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                        Toast.makeText(FeedbackActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
                 }
                 else
-                    Toast.makeText(FeedbackActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -58,22 +58,25 @@ public class EventCateringActivity extends AppCompatActivity {
         btnfeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!etfeedback.getText().toString().equals(""))
-                {
-                    String key = databaseReference.push().getKey();
+                if(Common.isConnectedToInternet(EventCateringActivity.this)) {
+                    if (!etfeedback.getText().toString().equals("")) {
+                        String key = databaseReference.push().getKey();
 
-                    databaseReference.child(key).child("userphone").setValue(phone);
-                    databaseReference.child(key).child("request").setValue(etfeedback.getText().toString());
+                        databaseReference.child(key).child("userphone").setValue(phone);
+                        databaseReference.child(key).child("request").setValue(etfeedback.getText().toString());
 
-                    Calendar mcurrentTime = Calendar.getInstance();
-                    long currenttime = mcurrentTime.getTimeInMillis();
-                    databaseReference.child(key).child("datetimeofrequest").setValue(Common.getDate(currenttime));
+                        Calendar mcurrentTime = Calendar.getInstance();
+                        long currenttime = mcurrentTime.getTimeInMillis();
+                        databaseReference.child(key).child("datetimeofrequest").setValue(Common.getDate(currenttime));
 
-                    //databaseReference.child(phone).setValue(etfeedback.getText().toString());
-                    Toast.makeText(EventCateringActivity.this, "Your request submitted successfully !", Toast.LENGTH_SHORT).show();
+                        //databaseReference.child(phone).setValue(etfeedback.getText().toString());
+                        Toast.makeText(EventCateringActivity.this, "Your request submitted successfully !", Toast.LENGTH_SHORT).show();
+                    } else
+                        Toast.makeText(EventCateringActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
                 }
                 else
-                    Toast.makeText(EventCateringActivity.this, "Please enter feedback!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
+
             }
         });
 

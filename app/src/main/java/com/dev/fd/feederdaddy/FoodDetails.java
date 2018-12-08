@@ -1,9 +1,11 @@
 package com.dev.fd.feederdaddy;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -63,6 +65,7 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
     TextView fqname,fhname,ffname;
 
     TextView text_count;
+    ObjectAnimator vibrate;
 
 
     RelativeLayout llquarter,rladdonq,rladdonh,rladdonf, llhalf, llfull;
@@ -313,6 +316,11 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         recycler_addon_half.setLayoutManager(layoutManager2);
         recycler_addon_full.setLayoutManager(layoutManager3);
 
+         vibrate = ObjectAnimator.ofFloat(btnCart,"rotation", 0f, 20f,0f,-20f,0f);
+        vibrate.setRepeatCount(10);
+        vibrate.setDuration(200);
+
+
         /*if(isaddon.equals("1")) {
             addonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
                     foods.child("addons") // find that foods with menuid==categoryid
@@ -418,6 +426,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         else {
             text_count.setVisibility(View.VISIBLE);
             text_count.setText(sct);
+            if(ct>0)
+            {btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                vibrate.start();
+            }
+            else if(ct==0)
+                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));
         }
 
         // setting elegant number btn change listener to update cart
@@ -462,6 +476,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 else {
                     text_count.setVisibility(View.VISIBLE);
                     text_count.setText(sct);
+                    if(ct>0) {
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                        vibrate.start();
+                    }
+                    else if(ct==0)
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));
                 }
             }
         });
@@ -500,7 +520,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 else {
                     text_count.setVisibility(View.VISIBLE);
                     text_count.setText(sct);
-                }
+                    if(ct>0)
+                    {
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                        vibrate.start();
+                    }                    else if(ct==0)
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));                }
             }
         });
         fnb.setOnValueChangeListener(new ElegantNumberButton.OnValueChangeListener() {
@@ -539,7 +564,12 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
                 else {
                     text_count.setVisibility(View.VISIBLE);
                     text_count.setText(sct);
-                }
+                    if(ct>0)
+                    {
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                        vibrate.start();
+                    }                    else if(ct==0)
+                        btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));                }
             }
         });
 
@@ -574,286 +604,300 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         foods.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                currentFood = dataSnapshot.getValue(Food.class);
 
-                if(dataSnapshot.child("quartername").getValue()!=null)
-                    fqname.setText(dataSnapshot.child("quartername").getValue().toString());
-                else
-                    fqname.setText("Quarter");
-                if(dataSnapshot.child("halfname").getValue()!=null)
-                    fhname.setText(dataSnapshot.child("halfname").getValue().toString());
-                else
-                    fhname.setText("Half");
-                if(dataSnapshot.child("fullname").getValue()!=null)
-                    ffname.setText(dataSnapshot.child("fullname").getValue().toString());
-                else
-                    ffname.setText("Full");
+                if (dataSnapshot.getValue() != null) {
 
+                    currentFood = dataSnapshot.getValue(Food.class);
 
-                if(dataSnapshot.child("addons").getValue()!=null)
-                {
-                    isaddon="1";
-                    qaddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
-                            foods.child("addons") // find that foods with menuid==categoryid
-                    ) {
-                        @Override
-                        protected void onDataChanged() {
-                            super.onDataChanged();
-                            recycler_addon_quarter.setAdapter(qaddonadapter);
-                        }
-
-                        @Override
-                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
-                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
-
-                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
-
-                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    String pos = String.valueOf(position+1);
-                                    if(pos.length()==1) pos="0"+pos;
-                                    if (isChecked) {
-                                        new Database(getBaseContext()).addToCart(new Order(
-                                                Integer.parseInt(timeidstr +"1"+ pos),
-                                                FoodId,
-                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+fqname.getText().toString()+" "+ currentFood.getName()+")" ,
-                                                "1",
-                                                model.getAddonitemprice(),
-                                                currentFood.getImage(),
-                                                RestaurantId,
-                                                MenuId
-                                        ));
-                                    } else {
-                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr +"1"+ pos));
-                                    }
-                                    int ct = new Database(FoodDetails.this).getCountCart();
-                                    String sct = String.valueOf(ct);
-                                    if (ct == 0)
-                                        text_count.setVisibility(View.GONE);
-                                    else {
-                                        text_count.setVisibility(View.VISIBLE);
-                                        text_count.setText(sct);
-                                    }
-                                }
-                            });
-
-                        }
-                    };
-                    haddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
-                            foods.child("addons") // find that foods with menuid==categoryid
-                    ) {
-
-                        @Override
-                        protected void onDataChanged() {
-                            super.onDataChanged();
-                            recycler_addon_half.setAdapter(haddonadapter);
-                        }
-
-                        @Override
-                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
-                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
-
-                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
-
-                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    String pos = String.valueOf(position+1);
-                                    if(pos.length()==1) pos="0"+pos;
-                                    if (isChecked) {
-                                        new Database(getBaseContext()).addToCart(new Order(
-                                                Integer.parseInt(timeidstr +"2"+ pos),
-                                                FoodId,
-                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+fhname.getText().toString()+" "+ currentFood.getName()+")" ,
-                                                "1",
-                                                model.getAddonitemprice(),
-                                                currentFood.getImage(),
-                                                RestaurantId,
-                                                MenuId
-                                        ));
-                                    } else {
-                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr +"2"+ pos));
-                                    }
-                                    int ct = new Database(FoodDetails.this).getCountCart();
-                                    String sct = String.valueOf(ct);
-                                    if (ct == 0)
-                                        text_count.setVisibility(View.GONE);
-                                    else {
-                                        text_count.setVisibility(View.VISIBLE);
-                                        text_count.setText(sct);
-                                    }
-                                }
-                            });
-
-                        }
-                    };
-                    faddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
-                            foods.child("addons") // find that foods with menuid==categoryid
-                    ) {
-
-                        @Override
-                        protected void onDataChanged() {
-                            super.onDataChanged();
-                            recycler_addon_full.setAdapter(faddonadapter);
-                        }
-
-                        @Override
-                        protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
-                            viewHolder.txtaddonitemname.setText(model.getAddonitemname());
-
-                            viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
-
-                            viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    String pos = String.valueOf(position+1);
-                                    if(pos.length()==1) pos="0"+pos;
-                                    if (isChecked) {
-                                        new Database(getBaseContext()).addToCart(new Order(
-                                                Integer.parseInt(timeidstr+"3"+pos),
-                                                FoodId,
-                                                "(AddOn)" + model.getAddonitemname() + " in "+ "("+ffname.getText().toString()+" "+ currentFood.getName()+")" ,
-                                                "1",
-                                                model.getAddonitemprice(),
-                                                currentFood.getImage(),
-                                                RestaurantId,
-                                                MenuId
-                                        ));
-                                    } else {
-                                        new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr+"3"+pos));
-                                    }
-                                    int ct = new Database(FoodDetails.this).getCountCart();
-                                    String sct = String.valueOf(ct);
-                                    if (ct == 0)
-                                        text_count.setVisibility(View.GONE);
-                                    else {
-                                        text_count.setVisibility(View.VISIBLE);
-                                        text_count.setText(sct);
-                                    }
-                                }
-                            });
-
-                        }
-                    };
-                }
-                else
-                {
-                    isaddon="0";
-                    rladdonq.setVisibility(View.GONE);
-                    rladdonh.setVisibility(View.GONE);
-                    rladdonf.setVisibility(View.GONE);
-                }
-
-                Picasso.with(getBaseContext()).load(currentFood.getImage()).into(food_image);
-                if(currentFood.getVeg().equals("1")) {
-                    imgveg.setVisibility(View.VISIBLE);
-                    food_name.setTextColor(getResources().getColor(R.color.green));
-                }
-                else
-                    imgnonveg.setVisibility(View.VISIBLE);
-
-                Double drating = Double.parseDouble(currentFood.getRating());
-                String rat = String.format("%.1f",drating);
-                txtrating.setText(rat);
-
-                collapsingToolbarLayout.setTitle(currentFood.getName());
-                //collapsingToolbarLayout.setContentScrim();
-
-                if(currentFood.getQuarterprice().equals("null"))
-                    llquarter.setVisibility(View.GONE);
-                if(currentFood.getHalfprice().equals("null"))
-                    llhalf.setVisibility(View.GONE);
-                if(currentFood.getFullprice().equals("null"))
-                    llfull.setVisibility(View.GONE);
-
-                String isrestaurantdiscount = sharedPreferences.getString("restaurantdiscount","N/A");
-
-                if(!currentFood.getQuarterprice().equals("null"))
-                {
-
-                    food_quarterprice.setText("₹"+currentFood.getQuarterprice());
-                    food_quarterprice.setPaintFlags(food_quarterprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    String qpricestr = currentFood.getQuarterprice();
-
-                    String qdiscountstr;
-                    if(isrestaurantdiscount.equals("null"))
-                        qdiscountstr = currentFood.getQuarterdiscount();
+                    if (dataSnapshot.child("quartername").getValue() != null)
+                        fqname.setText(dataSnapshot.child("quartername").getValue().toString());
                     else
-                        qdiscountstr = isrestaurantdiscount;
-
-                    double qdis = Double.parseDouble(qdiscountstr);
-                    double qprice = Double.parseDouble(qpricestr);
-                     double fqpriced = qprice - ( (qdis*qprice)/100.0 );
-                    fqprice = (int) fqpriced;
-                    food_quarterfinalprice.setText(": ₹"+fqprice);
-                    if(!qdiscountstr.equals("0"))
-                    food_quarterdiscount.setText(qdiscountstr+"% OFF");
+                        fqname.setText("Quarter");
+                    if (dataSnapshot.child("halfname").getValue() != null)
+                        fhname.setText(dataSnapshot.child("halfname").getValue().toString());
                     else
-                    {
-                        food_quarterdiscount.setVisibility(View.GONE);
-                        food_quarterprice.setVisibility(View.GONE);
+                        fhname.setText("Half");
+                    if (dataSnapshot.child("fullname").getValue() != null)
+                        ffname.setText(dataSnapshot.child("fullname").getValue().toString());
+                    else
+                        ffname.setText("Full");
+
+
+                    if (dataSnapshot.child("addons").getValue() != null) {
+                        isaddon = "1";
+                        qaddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                                foods.child("addons") // find that foods with menuid==categoryid
+                        ) {
+                            @Override
+                            protected void onDataChanged() {
+                                super.onDataChanged();
+                                recycler_addon_quarter.setAdapter(qaddonadapter);
+                            }
+
+                            @Override
+                            protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                                viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                                viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                                viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                        String pos = String.valueOf(position + 1);
+                                        if (pos.length() == 1) pos = "0" + pos;
+                                        if (isChecked) {
+                                            new Database(getBaseContext()).addToCart(new Order(
+                                                    Integer.parseInt(timeidstr + "1" + pos),
+                                                    FoodId,
+                                                    "(AddOn)" + model.getAddonitemname() + " in " + "(" + fqname.getText().toString() + " " + currentFood.getName() + ")",
+                                                    "1",
+                                                    model.getAddonitemprice(),
+                                                    currentFood.getImage(),
+                                                    RestaurantId,
+                                                    MenuId
+                                            ));
+                                        } else {
+                                            new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr + "1" + pos));
+                                        }
+                                        int ct = new Database(FoodDetails.this).getCountCart();
+                                        String sct = String.valueOf(ct);
+                                        if (ct == 0)
+                                            text_count.setVisibility(View.GONE);
+                                        else {
+                                            text_count.setVisibility(View.VISIBLE);
+                                            text_count.setText(sct);
+                                            if (ct > 0)
+                                            {
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                                                vibrate.start();
+                                            }                                            else if (ct == 0)
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));
+                                        }
+                                    }
+                                });
+
+                            }
+                        };
+                        haddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                                foods.child("addons") // find that foods with menuid==categoryid
+                        ) {
+
+                            @Override
+                            protected void onDataChanged() {
+                                super.onDataChanged();
+                                recycler_addon_half.setAdapter(haddonadapter);
+                            }
+
+                            @Override
+                            protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                                viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                                viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                                viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                        String pos = String.valueOf(position + 1);
+                                        if (pos.length() == 1) pos = "0" + pos;
+                                        if (isChecked) {
+                                            new Database(getBaseContext()).addToCart(new Order(
+                                                    Integer.parseInt(timeidstr + "2" + pos),
+                                                    FoodId,
+                                                    "(AddOn)" + model.getAddonitemname() + " in " + "(" + fhname.getText().toString() + " " + currentFood.getName() + ")",
+                                                    "1",
+                                                    model.getAddonitemprice(),
+                                                    currentFood.getImage(),
+                                                    RestaurantId,
+                                                    MenuId
+                                            ));
+                                        } else {
+                                            new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr + "2" + pos));
+                                        }
+                                        int ct = new Database(FoodDetails.this).getCountCart();
+                                        String sct = String.valueOf(ct);
+                                        if (ct == 0)
+                                            text_count.setVisibility(View.GONE);
+                                        else {
+                                            text_count.setVisibility(View.VISIBLE);
+                                            text_count.setText(sct);
+                                            if (ct > 0)
+                                            {
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                                                vibrate.start();
+                                            }                                            else if (ct == 0)
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));
+                                        }
+                                    }
+                                });
+
+                            }
+                        };
+                        faddonadapter = new FirebaseRecyclerAdapter<AddOnsModel, AddOnViewHolder>(AddOnsModel.class, R.layout.addonitem_layout, AddOnViewHolder.class,
+                                foods.child("addons") // find that foods with menuid==categoryid
+                        ) {
+
+                            @Override
+                            protected void onDataChanged() {
+                                super.onDataChanged();
+                                recycler_addon_full.setAdapter(faddonadapter);
+                            }
+
+                            @Override
+                            protected void populateViewHolder(AddOnViewHolder viewHolder, final AddOnsModel model, final int position) {
+                                viewHolder.txtaddonitemname.setText(model.getAddonitemname());
+
+                                viewHolder.txtaddonitemprice.setText("₹" + model.getAddonitemprice());
+
+                                viewHolder.cbaddonitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                        String pos = String.valueOf(position + 1);
+                                        if (pos.length() == 1) pos = "0" + pos;
+                                        if (isChecked) {
+                                            new Database(getBaseContext()).addToCart(new Order(
+                                                    Integer.parseInt(timeidstr + "3" + pos),
+                                                    FoodId,
+                                                    "(AddOn)" + model.getAddonitemname() + " in " + "(" + ffname.getText().toString() + " " + currentFood.getName() + ")",
+                                                    "1",
+                                                    model.getAddonitemprice(),
+                                                    currentFood.getImage(),
+                                                    RestaurantId,
+                                                    MenuId
+                                            ));
+                                        } else {
+                                            new Database(getBaseContext()).removeFoodFromCart(Integer.parseInt(timeidstr + "3" + pos));
+                                        }
+                                        int ct = new Database(FoodDetails.this).getCountCart();
+                                        String sct = String.valueOf(ct);
+                                        if (ct == 0)
+                                            text_count.setVisibility(View.GONE);
+                                        else {
+                                            text_count.setVisibility(View.VISIBLE);
+                                            text_count.setText(sct);
+                                            if (ct > 0)
+                                            {
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1e90ff")));
+                                                vibrate.start();
+                                            }
+                                            else if (ct == 0)
+                                                btnCart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ffffff")));
+                                        }
+                                    }
+                                });
+
+                            }
+                        };
+                    } else {
+                        isaddon = "0";
+                        rladdonq.setVisibility(View.GONE);
+                        rladdonh.setVisibility(View.GONE);
+                        rladdonf.setVisibility(View.GONE);
                     }
 
-                }
-                if(!currentFood.getHalfprice().equals("null"))
-                {
-                    food_halfprice.setText("₹"+currentFood.getHalfprice());
-                    food_halfprice.setPaintFlags(food_halfprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    String hpricestr = currentFood.getHalfprice();
+                    Picasso.with(getBaseContext()).load(currentFood.getImage()).into(food_image);
+                    if (currentFood.getVeg().equals("1")) {
+                        imgveg.setVisibility(View.VISIBLE);
+                        food_name.setTextColor(getResources().getColor(R.color.green));
+                    } else
+                        imgnonveg.setVisibility(View.VISIBLE);
 
-                    String hdiscountstr;
-                    if(isrestaurantdiscount.equals("null"))
-                        hdiscountstr = currentFood.getHalfdiscount();
-                    else
-                        hdiscountstr = isrestaurantdiscount;
+                    Double drating = Double.parseDouble(currentFood.getRating());
+                    String rat = String.format("%.1f", drating);
+                    txtrating.setText(rat);
 
-                    double hdis = Double.parseDouble(hdiscountstr);
-                    double hprice = Double.parseDouble(hpricestr);
-                     double fhpriced = hprice - ( (hdis*hprice)/100.0 );
-                    fhprice = (int) fhpriced;
-                    food_halffinalprice.setText(": ₹"+fhprice);
-                    if(!hdiscountstr.equals("0"))
-                        food_halfdiscount.setText(hdiscountstr+"% OFF");
-                    else
-                    {
-                        food_halfdiscount.setVisibility(View.GONE);
-                        food_halfprice.setVisibility(View.GONE);
+                    collapsingToolbarLayout.setTitle(currentFood.getName());
+                    //collapsingToolbarLayout.setContentScrim();
+
+                    if (currentFood.getQuarterprice().equals("null"))
+                        llquarter.setVisibility(View.GONE);
+                    if (currentFood.getHalfprice().equals("null"))
+                        llhalf.setVisibility(View.GONE);
+                    if (currentFood.getFullprice().equals("null"))
+                        llfull.setVisibility(View.GONE);
+
+                    String isrestaurantdiscount = sharedPreferences.getString("restaurantdiscount", "N/A");
+
+                    if (!currentFood.getQuarterprice().equals("null")) {
+
+                        food_quarterprice.setText("₹" + currentFood.getQuarterprice());
+                        food_quarterprice.setPaintFlags(food_quarterprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        String qpricestr = currentFood.getQuarterprice();
+
+                        String qdiscountstr;
+                        if (isrestaurantdiscount.equals("null"))
+                            qdiscountstr = currentFood.getQuarterdiscount();
+                        else
+                            qdiscountstr = isrestaurantdiscount;
+
+                        double qdis = Double.parseDouble(qdiscountstr);
+                        double qprice = Double.parseDouble(qpricestr);
+                        double fqpriced = qprice - ((qdis * qprice) / 100.0);
+                        fqprice = (int) fqpriced;
+                        food_quarterfinalprice.setText(": ₹" + fqprice);
+                        if (!qdiscountstr.equals("0"))
+                            food_quarterdiscount.setText(qdiscountstr + "% OFF");
+                        else {
+                            food_quarterdiscount.setVisibility(View.GONE);
+                            food_quarterprice.setVisibility(View.GONE);
+                        }
+
+                    }
+                    if (!currentFood.getHalfprice().equals("null")) {
+                        food_halfprice.setText("₹" + currentFood.getHalfprice());
+                        food_halfprice.setPaintFlags(food_halfprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        String hpricestr = currentFood.getHalfprice();
+
+                        String hdiscountstr;
+                        if (isrestaurantdiscount.equals("null"))
+                            hdiscountstr = currentFood.getHalfdiscount();
+                        else
+                            hdiscountstr = isrestaurantdiscount;
+
+                        double hdis = Double.parseDouble(hdiscountstr);
+                        double hprice = Double.parseDouble(hpricestr);
+                        double fhpriced = hprice - ((hdis * hprice) / 100.0);
+                        fhprice = (int) fhpriced;
+                        food_halffinalprice.setText(": ₹" + fhprice);
+                        if (!hdiscountstr.equals("0"))
+                            food_halfdiscount.setText(hdiscountstr + "% OFF");
+                        else {
+                            food_halfdiscount.setVisibility(View.GONE);
+                            food_halfprice.setVisibility(View.GONE);
+                        }
+
+                    }
+                    if (!currentFood.getFullprice().equals("null")) {
+                        food_fullprice.setText("₹" + currentFood.getFullprice());
+                        food_fullprice.setPaintFlags(food_fullprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        String fpricestr = currentFood.getFullprice();
+
+                        String fdiscountstr;
+                        if (isrestaurantdiscount.equals("null"))
+                            fdiscountstr = currentFood.getFulldiscount();
+                        else
+                            fdiscountstr = isrestaurantdiscount;
+
+                        double fdis = Double.parseDouble(fdiscountstr);
+                        double fprice = Double.parseDouble(fpricestr);
+                        double ffpriced = fprice - ((fdis * fprice) / 100.0);
+                        ffprice = (int) ffpriced;
+                        food_fullfinalprice.setText(": ₹" + ffprice);
+                        if (!fdiscountstr.equals("0"))
+                            food_fulldiscount.setText(fdiscountstr + "% OFF");
+                        else {
+                            food_fulldiscount.setVisibility(View.GONE);
+                            food_fullprice.setVisibility(View.GONE);
+                        }
+
                     }
 
-                }
-                if(!currentFood.getFullprice().equals("null"))
-                {
-                    food_fullprice.setText("₹"+currentFood.getFullprice());
-                    food_fullprice.setPaintFlags(food_fullprice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    String fpricestr = currentFood.getFullprice();
-
-                    String fdiscountstr;
-                    if(isrestaurantdiscount.equals("null"))
-                    fdiscountstr = currentFood.getFulldiscount();
-                    else
-                        fdiscountstr = isrestaurantdiscount;
-
-                    double fdis = Double.parseDouble(fdiscountstr);
-                    double fprice = Double.parseDouble(fpricestr);
-                     double ffpriced = fprice - ( (fdis*fprice)/100.0 );
-                    ffprice = (int) ffpriced;
-                    food_fullfinalprice.setText(": ₹"+ffprice);
-                    if(!fdiscountstr.equals("0"))
-                        food_fulldiscount.setText(fdiscountstr+"% OFF");
-                    else
-                    {
-                        food_fulldiscount.setVisibility(View.GONE);
-                        food_fullprice.setVisibility(View.GONE);
-                    }
+                    //food_price.setText("₹"+currentFood.getPrice());
+                    food_name.setText(currentFood.getName());
+                    txttotalrates.setText("(" + currentFood.getTotalrates() + ")");
+                    ratingBar.setRating(Float.valueOf(currentFood.getRating()));
+                    food_description.setText(currentFood.getDescription());
 
                 }
-
-                //food_price.setText("₹"+currentFood.getPrice());
-                food_name.setText(currentFood.getName());
-                txttotalrates.setText("("+currentFood.getTotalrates()+")");
-                ratingBar.setRating(Float.valueOf(currentFood.getRating()));
-                food_description.setText(currentFood.getDescription());
             }
 
             @Override
@@ -885,19 +929,18 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         rating.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child(phone).exists())
-                {
-                    flag=1;
-                    String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
-                    oldrating = Double.parseDouble(oldrat);
-                    updaterating();
-                }
-                else
-                {
-                    flag=0;
-                    updaterating();
-                }
+                if(dataSnapshot.getValue()!=null) {
 
+                    if (dataSnapshot.child(phone).exists()) {
+                        flag = 1;
+                        String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
+                        oldrating = Double.parseDouble(oldrat);
+                        updaterating();
+                    } else {
+                        flag = 0;
+                        updaterating();
+                    }
+                }
             }
 
             @Override
@@ -941,20 +984,23 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         menurating.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String mprevrating = dataSnapshot.child("rating").getValue().toString();
-                String mprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
-                Double mdprevrating = Double.parseDouble(mprevrating);
-                Double mdprevtotalrates =Double.parseDouble(mprevtotalrates);
-                Double mprod =mdprevrating * mdprevtotalrates;
-                mprod += value-oldrating;
+                if(dataSnapshot.getValue()!=null) {
 
-                if(flag==0)
-                    mdprevtotalrates+=1.0;
+                    String mprevrating = dataSnapshot.child("rating").getValue().toString();
+                    String mprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
+                    Double mdprevrating = Double.parseDouble(mprevrating);
+                    Double mdprevtotalrates = Double.parseDouble(mprevtotalrates);
+                    Double mprod = mdprevrating * mdprevtotalrates;
+                    mprod += value - oldrating;
 
-                mprod =mprod/mdprevtotalrates;
-                menurating.child("rating").setValue(String.valueOf(mprod));
-                String ntotalrates = String.format("%.0f",mdprevtotalrates);
-                menurating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                    if (flag == 0)
+                        mdprevtotalrates += 1.0;
+
+                    mprod = mprod / mdprevtotalrates;
+                    menurating.child("rating").setValue(String.valueOf(mprod));
+                    String ntotalrates = String.format("%.0f", mdprevtotalrates);
+                    menurating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                }
             }
 
             @Override
@@ -968,21 +1014,23 @@ public class FoodDetails extends AppCompatActivity implements RatingDialogListen
         restaurantrating.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String rprevrating = dataSnapshot.child("rating").getValue().toString();
-                String rprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
-                Double rdprevrating = Double.parseDouble(rprevrating);
-                Double rdprevtotalrates =Double.parseDouble(rprevtotalrates);
-                Double rprod =rdprevrating * rdprevtotalrates;
-                rprod += value-oldrating;
+                if(dataSnapshot.getValue()!=null) {
+                    String rprevrating = dataSnapshot.child("rating").getValue().toString();
+                    String rprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
+                    Double rdprevrating = Double.parseDouble(rprevrating);
+                    Double rdprevtotalrates = Double.parseDouble(rprevtotalrates);
+                    Double rprod = rdprevrating * rdprevtotalrates;
+                    rprod += value - oldrating;
 
-                if(flag==0)
-                    rdprevtotalrates+=1.0;
+                    if (flag == 0)
+                        rdprevtotalrates += 1.0;
 
-                rprod =rprod/rdprevtotalrates;
-                restaurantrating.child("rating").setValue(String.valueOf(rprod));
+                    rprod = rprod / rdprevtotalrates;
+                    restaurantrating.child("rating").setValue(String.valueOf(rprod));
 
-                String ntotalrates = String.format("%.0f",rdprevtotalrates);
-                restaurantrating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                    String ntotalrates = String.format("%.0f", rdprevtotalrates);
+                    restaurantrating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                }
             }
 
             @Override

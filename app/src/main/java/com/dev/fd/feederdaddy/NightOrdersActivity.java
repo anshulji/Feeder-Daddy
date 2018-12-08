@@ -62,7 +62,7 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
 
     ProgressBar progressBar;
 
-    String city,isopen="1";
+    String city,isopen="1",restaurantdiscount="0";
 
     SharedPreferences sharedPreferences;
     public static String phone,userlatitude,userlongitude,deliverycharges;
@@ -96,7 +96,7 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
         TextView txtcallorwhatsapp = view.findViewById(R.id.txtcallorwhatsapp);
         progressBar = view.findViewById(R.id.progressbar);
 
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.WHITE);
         toolbar.setTitle("Night Orders");
 
@@ -171,15 +171,20 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
             //init firebase
             database = FirebaseDatabase.getInstance();
             NightOrdersRef = database.getReference(city).child("Foods").child("-2").child("1");
-            restref  = database.getReference(city).child("Restaurant").child("-2").child("isopen");
+            restref  = database.getReference(city).child("Restaurant").child("-2");
 
             restref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue().toString().equals("1"))
-                        isopen="1";
-                    else
-                        isopen="0";
+                    if(dataSnapshot.getValue()!=null) {
+                        if (dataSnapshot.child("isopen").getValue().toString().equals("1"))
+                            isopen = "1";
+                        else
+                        {isopen="0";
+                            toolbar.setTitle("Night Orders (Currently Closed)");
+                        }
+                        restaurantdiscount = dataSnapshot.child("restaurantdiscount").getValue().toString();
+                    }
                 }
 
                 @Override
@@ -211,18 +216,22 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                 @Override
                 protected void populateViewHolder(HotDealViewHolder viewHolder, HotDeal model, int position) {
 
-                    if(isopen.equals("0")){
+                    /*if(isopen.equals("0")){
                         int color = R.color.black_filter;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            viewHolder.food_image.setForeground(new ColorDrawable(ContextCompat.getColor(getContext(), color)));
-                        }
-                        viewHolder.food_price.setText("Closed");
+                        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        //    viewHolder.food_image.setForeground(new ColorDrawable(ContextCompat.getColor(getContext(), color)));
+                       // }
+                        //viewHolder.food_price.setText("Closed");
                     }
+                    else
+                    {*/
+                        viewHolder.food_price.setText("₹ "+model.getFullprice());
+
+                    //}
 
                     Typeface face = Typeface.createFromAsset(getActivity().getAssets(),"NABILA.TTF");
                     viewHolder.food_name.setTypeface(face);
 
-                    viewHolder.food_price.setText("₹ "+model.getFullprice());
                     viewHolder.food_name.setText(model.getName());
                     Picasso.with(getActivity()).load(model.getImage()).into(viewHolder.food_image);
 
@@ -262,6 +271,7 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                                         editor.putString("deliveryrate","0");
                                         editor.putString("mindcdistance", "0.0");
                                         editor.putString("mindeliverycharge","0");
+                                        editor.putString("restaurantdiscount",restaurantdiscount);
                                         editor.commit();
 
                                         Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
@@ -290,6 +300,7 @@ public class NightOrdersActivity extends Fragment implements NavigationView.OnNa
                                 editor.putString("deliveryrate","0");
                                 editor.putString("mindcdistance", "0.0");
                                 editor.putString("mindeliverycharge","0");
+                                editor.putString("restaurantdiscount",restaurantdiscount);
                                 editor.commit();
 
                                 Intent fooddetail = new Intent(getActivity(),FoodDetails.class);

@@ -9,11 +9,14 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/feeder_daddy_logo"
-        android:label="Feeder Daddy"
+        android:label="FEEDERDADDY"
         android:largeHeap="true"
         android:roundIcon="@drawable/feeder_daddy_logo"
         android:supportsRtl="true"

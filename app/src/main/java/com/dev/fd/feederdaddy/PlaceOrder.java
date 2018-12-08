@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -66,8 +67,9 @@ public class PlaceOrder extends AppCompatActivity {
     RatingBar ratingBar;
     FButton btnconfirmorder;
     LinearLayout llpromobill;
+    RelativeLayout rl1,rl2,rl3;
 
-    CheckBox cbasap,cbschedule;
+    CheckBox cbasap,cbschedule,cbthird;
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -128,10 +130,11 @@ public class PlaceOrder extends AppCompatActivity {
         currentrequestsref = firebaseDatabase.getReference("CurrentRequests");
         totalordersref = firebaseDatabase.getReference("TotalOrders");
 
-        totalordersref.addListenerForSingleValueEvent(new ValueEventListener() {
+        totalordersref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                totalordersstr = dataSnapshot.getValue().toString();
+                if(dataSnapshot.getValue()!=null)
+                    totalordersstr = dataSnapshot.getValue().toString();
             }
 
             @Override
@@ -167,6 +170,10 @@ public class PlaceOrder extends AppCompatActivity {
         txtasap = findViewById(R.id.txtasap);
         txtschedule = findViewById(R.id.txtschedule);
         cbasap = findViewById(R.id.cbasap);
+        rl1 = findViewById(R.id.rl1);
+        rl2 = findViewById(R.id.rl2);
+        rl3 = findViewById(R.id.rl3);
+        cbthird = findViewById(R.id.cbthird);
 
         cbschedule = findViewById(R.id.cbschedule);
 
@@ -196,36 +203,37 @@ public class PlaceOrder extends AppCompatActivity {
                         promoref.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                for(DataSnapshot postSnapshot :  dataSnapshot.getChildren())
-                                {
-                                    if(edtpromocode.getText().toString().equalsIgnoreCase(postSnapshot.child("name").getValue().toString()))
-                                    {
-                                        t=1;
-                                        txtpcas.setVisibility(View.VISIBLE);
-                                        txtapplypc.setText("REMOVE");
-                                        txtapplypc.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        edtpromocode.setEnabled(false);
-                                        edtpromocode.setText(postSnapshot.child("name").getValue().toString()+" - "+
-                                                postSnapshot.child("discount").getValue().toString()+"% OFF");
-                                        edtpromocode.setTextColor(Color.parseColor("#1e90ff"));
+                                if(dataSnapshot.getValue()!=null) {
 
-                                        llpromobill.setVisibility(View.VISIBLE);
-                                        txtsubltotal.setText("₹"+subtotal);
-                                        txtpromocodename.setText("Promo - ("+postSnapshot.child("name").getValue().toString()+")");
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        if (edtpromocode.getText().toString().equalsIgnoreCase(postSnapshot.child("name").getValue().toString())) {
+                                            t = 1;
+                                            txtpcas.setVisibility(View.VISIBLE);
+                                            txtapplypc.setText("REMOVE");
+                                            txtapplypc.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                            edtpromocode.setEnabled(false);
+                                            edtpromocode.setText(postSnapshot.child("name").getValue().toString() + " - " +
+                                                    postSnapshot.child("discount").getValue().toString() + "% OFF");
+                                            edtpromocode.setTextColor(Color.parseColor("#1e90ff"));
 
-                                        int promodiscount = Integer.parseInt(postSnapshot.child("discount").getValue().toString());
-                                        float promoamount = (promodiscount*subtotal)/100;
-                                        int promoamnt = (int)promoamount;
-                                        txtpromocodeamount.setText("-₹"+promoamnt);
-                                        int totalamnt = subtotal+Integer.parseInt(deliverycharge)-promoamnt;
-                                        txttotalamount.setText("₹"+totalamnt);
+                                            llpromobill.setVisibility(View.VISIBLE);
+                                            txtsubltotal.setText("₹" + subtotal);
+                                            txtpromocodename.setText("Promo - (" + postSnapshot.child("name").getValue().toString() + ")");
 
-                                        rqpromoamount = String.valueOf(promoamnt);
-                                        rqpromocode = "Promo - ("+postSnapshot.child("name").getValue().toString()+")";
+                                            int promodiscount = Integer.parseInt(postSnapshot.child("discount").getValue().toString());
+                                            float promoamount = (promodiscount * subtotal) / 100;
+                                            int promoamnt = (int) promoamount;
+                                            txtpromocodeamount.setText("-₹" + promoamnt);
+                                            int totalamnt = subtotal + Integer.parseInt(deliverycharge) - promoamnt;
+                                            txttotalamount.setText("₹" + totalamnt);
+
+                                            rqpromoamount = String.valueOf(promoamnt);
+                                            rqpromocode = "Promo - (" + postSnapshot.child("name").getValue().toString() + ")";
+                                        }
                                     }
+                                    if (t == 0)
+                                        Toast.makeText(PlaceOrder.this, "No Such Promo Code Exist !", Toast.LENGTH_SHORT).show();
                                 }
-                                if(t==0)
-                                    Toast.makeText(PlaceOrder.this, "No Such Promo Code Exist !", Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
@@ -396,170 +404,195 @@ public class PlaceOrder extends AppCompatActivity {
         userlatitude = sharedPreferences.getString("latitude","N/A");
         userlongitude = sharedPreferences.getString("longitude","N/A");
 
-        restaurantinforef.addListenerForSingleValueEvent(new ValueEventListener() {
+        restaurantinforef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
+                if(dataSnapshot.getValue()!=null) {
 
-                if(dataSnapshot.child("areaname").getValue()!=null)
-                restareaname = dataSnapshot.child("areaname").getValue().toString();
-                else
-                    restareaname="";
+                    if (dataSnapshot.child("areaname").getValue() != null)
+                        restareaname = dataSnapshot.child("areaname").getValue().toString();
+                    else
+                        restareaname = "";
 
-                restphone = dataSnapshot.child("restaurantphone").getValue().toString();
+                    restphone = dataSnapshot.child("restaurantphone").getValue().toString();
 
-                if(dataSnapshot.child("opentime").getValue()!=null)
-                {
-                    restclosetimehr= Integer.parseInt(dataSnapshot.child("opentime").getValue().toString().substring(6,8));
-                    restclosetimemin = Integer.parseInt(dataSnapshot.child("opentime").getValue().toString().substring(9,11));
-                }
-
-
-                txtrestname.setText(dataSnapshot.child("name").getValue().toString());
-                ratingBar.setRating(Float.parseFloat(dataSnapshot.child("rating").getValue().toString()));
-
-                Double drating = Double.parseDouble(dataSnapshot.child("rating").getValue().toString());
-                String rat = String.format("%.1f",drating);
-                txtrating.setText(rat);
-
-                restimageurl = dataSnapshot.child("image").getValue().toString();
-                Picasso.with(getBaseContext()).load(dataSnapshot.child("image").getValue().toString()).fit().centerCrop().into(imgrest);
-                txtaddress.setText(address);
-
-
-                //set delivery time and charge
-                distance = getDistanceFromLatLonInKm(Double.parseDouble(userlatitude)
-                        ,Double.parseDouble(userlongitude)
-                        ,Double.parseDouble(dataSnapshot.child("latitude").getValue().toString())
-                        ,Double.parseDouble(dataSnapshot.child("longitude").getValue().toString()));
-                String dist = String.format("%.2f",distance);
-
-                //Double rate = Double.parseDouble(deliveryrate);
-
-                if(dataSnapshot.child("maxamount").getValue()!=null)
-                maxamount = dataSnapshot.child("maxamount").getValue().toString();
-                else
-                    maxamount="99999";
-
-                cart = new Database(PlaceOrder.this).getCarts();
-                //calculate total price
-                total = 0;
-                for(Order order:cart)
-                    total+=(Integer.parseInt(order.getPrice()))*Integer.parseInt(order.getQuantity());
-
-                if(restaurantid.equals("1"))
-                {
-                    DatabaseReference dbref = firebaseDatabase.getReference(city).child("ShaChickenDC");
-                    dbref.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            mindcdistance = Double.parseDouble(dataSnapshot.child("mindcdistance").getValue().toString());
-                            deliveryrate = Double.parseDouble(dataSnapshot.child("deliverychargeperkm").getValue().toString());
-                            mindeliverycharge = Double.parseDouble(dataSnapshot.child("mindeliverycharge").getValue().toString());
-
-
-                            if (restaurantid.equals("1") && total > 500) {
-                                if (distance < mindcdistance) charge = mindeliverycharge;
-                                else charge = distance * deliveryrate;
-
-                                charge = (charge * total) / 500;
-
-                            } else if (total >= Integer.parseInt(maxamount)) {
-                                charge = 0.0;
-                            } else if (distance < mindcdistance) {
-                                charge = mindeliverycharge;
-                            } else {
-                                charge = distance * deliveryrate;
-                            }
-
-                            deliverycharge = String.format("%.0f",charge);
-                            txtdeliverycharge.setText("₹"+deliverycharge);
-
-
-                            //txt delivery time
-                            Double time = 20.0+ (distance/0.2);
-                            String timestr = String.format("%.0f",time);
-                            time+=15.0;
-                            String timestr1 = String.format("%.0f",time);
-                            txtdeliverytime.setText("Delivery Time : "+timestr+"-"+timestr1+" min");
-
-                            loadListFood();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-
-                }
-
-                else {
-                    if (restaurantid.equals("1") && total > 500) {
-                        if (distance < mindcdistance) charge = mindeliverycharge;
-                        else charge = distance * deliveryrate;
-
-                        charge = (charge * total) / 500;
-
-                    } else if (total >= Integer.parseInt(maxamount)) {
-                        charge = 0.0;
-                    } else if (distance < mindcdistance) {
-                        charge = mindeliverycharge;
-                    } else {
-                        charge = distance * deliveryrate;
+                    if (dataSnapshot.child("opentime").getValue() != null) {
+                        restclosetimehr = Integer.parseInt(dataSnapshot.child("opentime").getValue().toString().substring(6, 8));
+                        restclosetimemin = Integer.parseInt(dataSnapshot.child("opentime").getValue().toString().substring(9, 11));
                     }
 
-                    deliverycharge = String.format("%.0f",charge);
-                    txtdeliverycharge.setText("₹"+deliverycharge);
 
-                    //txt delivery time
-                    Double time = 20.0+ (distance/0.2);
-                     timestr = String.format("%.0f",time);
-                    time+=15.0;
-                     timestr1 = String.format("%.0f",time);
-                    txtdeliverytime.setText("Delivery Time : "+timestr+"-"+timestr1+" min");
+                    txtrestname.setText(dataSnapshot.child("name").getValue().toString());
+                    ratingBar.setRating(Float.parseFloat(dataSnapshot.child("rating").getValue().toString()));
 
-                    loadListFood();
-                }
+                    Double drating = Double.parseDouble(dataSnapshot.child("rating").getValue().toString());
+                    String rat = String.format("%.1f", drating);
+                    txtrating.setText(rat);
 
+                    restimageurl = dataSnapshot.child("image").getValue().toString();
+                    Picasso.with(getBaseContext()).load(dataSnapshot.child("image").getValue().toString()).fit().centerCrop().into(imgrest);
+                    txtaddress.setText(address);
 
 
+                    //set delivery time and charge
+                    distance = getDistanceFromLatLonInKm(Double.parseDouble(userlatitude)
+                            , Double.parseDouble(userlongitude)
+                            , Double.parseDouble(dataSnapshot.child("latitude").getValue().toString())
+                            , Double.parseDouble(dataSnapshot.child("longitude").getValue().toString()));
+                    String dist = String.format("%.2f", distance);
 
+                    //Double rate = Double.parseDouble(deliveryrate);
+
+                    if (dataSnapshot.child("maxamount").getValue() != null)
+                        maxamount = dataSnapshot.child("maxamount").getValue().toString();
+                    else
+                        maxamount = "99999";
+
+                    cart = new Database(PlaceOrder.this).getCarts();
+                    //calculate total price
+                    total = 0;
+                    for (Order order : cart)
+                        total += (Integer.parseInt(order.getPrice())) * Integer.parseInt(order.getQuantity());
+
+                    if (restaurantid.equals("1")) {
+                        DatabaseReference dbref = firebaseDatabase.getReference(city).child("ShaChickenDC");
+                        dbref.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.getValue() != null) {
+
+                                    mindcdistance = Double.parseDouble(dataSnapshot.child("mindcdistance").getValue().toString());
+                                    deliveryrate = Double.parseDouble(dataSnapshot.child("deliverychargeperkm").getValue().toString());
+                                    mindeliverycharge = Double.parseDouble(dataSnapshot.child("mindeliverycharge").getValue().toString());
+
+
+                                    if (restaurantid.equals("1") && total > 500) {
+                                        if (distance < mindcdistance) charge = mindeliverycharge;
+                                        else charge = distance * deliveryrate;
+
+                                        charge = (charge * total) / 500;
+
+                                    } else if (total >= Integer.parseInt(maxamount)) {
+                                        charge = 0.0;
+                                    } else if (distance < mindcdistance) {
+                                        charge = mindeliverycharge;
+                                    } else {
+                                        charge = distance * deliveryrate;
+                                    }
+
+                                    deliverycharge = String.format("%.0f", charge);
+                                    txtdeliverycharge.setText("₹" + deliverycharge);
+
+
+                                    //txt delivery time
+                                    Double time = 25.0 + (distance / 0.2);
+                                    String timestr = String.format("%.0f", time);
+                                    time += 15.0;
+                                    String timestr1 = String.format("%.0f", time);
+                                    txtdeliverytime.setText("Delivery Time : " + timestr + "-" + timestr1 + " min");
+
+                                    loadListFood();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+                    } else {
+                        if (restaurantid.equals("1") && total > 500) {
+                            if (distance < mindcdistance) charge = mindeliverycharge;
+                            else charge = distance * deliveryrate;
+
+                            charge = (charge * total) / 500;
+
+                        } else if (total >= Integer.parseInt(maxamount)) {
+                            charge = 0.0;
+                        } else if (distance < mindcdistance) {
+                            charge = mindeliverycharge;
+                        } else {
+                            charge = distance * deliveryrate;
+                        }
+
+                        deliverycharge = String.format("%.0f", charge);
+                        txtdeliverycharge.setText("₹" + deliverycharge);
+
+                        //txt delivery time
+                        Double time = 25.0 + (distance / 0.2);
+                        timestr = String.format("%.0f", time);
+                        time += 15.0;
+                        timestr1 = String.format("%.0f", time);
+                        txtdeliverytime.setText("Delivery Time : " + timestr + "-" + timestr1 + " min");
+
+                        loadListFood();
+                    }
 
 
                     Calendar mcurrentTime = Calendar.getInstance();
                     int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                     int minute = mcurrentTime.get(Calendar.MINUTE);
 
-                    txtasap.setText("ASAP : "+timestr+"-"+timestr1+" min");
-                    if(restaurantid.equals("1")) {
-                        txtasap.setText("07:00 PM - 08:00 PM");
-                        Orderreceivetime = "07:00 PM - 08:00 PM";
-                        txtschedule.setText("08:00 PM - 09:00 PM");
+                    txtasap.setText("ASAP : " + timestr + "-" + timestr1 + " min");
+                    if (restaurantid.equals("1")) {
+                        if(hour > 20 && minute > 30)
+                        {
+                            Toast.makeText(PlaceOrder.this, "Sha Chicken orders are closed for today!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                        else if(hour > 19 && minute>30)
+                        { rl1.setVisibility(View.GONE);
+                          rl2.setVisibility(View.GONE);
+                            rl3.setVisibility(View.VISIBLE);
+                            cbthird.setChecked(true);
+                            Orderreceivetime = "09:00 PM - 10:00 PM";
+                        }
+                        else if(hour>17)
+                        {
+                            rl1.setVisibility(View.GONE);
+                            rl2.setVisibility(View.VISIBLE);
+                            txtschedule.setText("08:00 PM - 09:00 PM");
+                            cbschedule.setChecked(true);
+                            rl3.setVisibility(View.VISIBLE);
+                            Orderreceivetime = "08:00 PM - 09:00 PM";
+                        }
+                        else
+                        {
+                            rl1.setVisibility(View.VISIBLE);
+                            rl2.setVisibility(View.VISIBLE);
+                            rl3.setVisibility(View.VISIBLE);
+                            cbasap.setChecked(true);
+                            txtasap.setText("05:30 PM - 06:15 PM");
+                            txtschedule.setText("08:00 PM - 09:00 PM");
+                        }
                     }
 
 
-                    cbasap.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    cbasap.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if(isChecked && !restaurantid.equals("1"))
-                            {
+                        public void onClick(View view) {
+                            if (cbasap.isChecked() && !restaurantid.equals("1")) {
                                 cbschedule.setChecked(false);
+                                cbthird.setChecked(false);
                                 Orderreceivetime = "ASAP";
-                            }
-                            else if (isChecked && restaurantid.equals("1"))
-                            {
+                            } else if (cbasap.isChecked() && restaurantid.equals("1")) {
                                 cbschedule.setChecked(false);
-                                Orderreceivetime = "07:00 PM - 08:00 PM";
+                                cbthird.setChecked(false);
+                                Orderreceivetime = "05:30 PM - 06:15 PM";
                             }
-
+                            else if(!cbasap.isChecked())
+                            {
+                                cbasap.setChecked(true);
+                            }
                         }
                     });
 
-                    cbschedule.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    cbschedule.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if(isChecked && !restaurantid.equals("1")) {
+                        public void onClick(View view) {
+                            if (cbschedule.isChecked() && !restaurantid.equals("1")) {
                                 cbasap.setChecked(false);
                                 Calendar mcurrentTime = Calendar.getInstance();
                                 final int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
@@ -575,13 +608,11 @@ public class PlaceOrder extends AppCompatActivity {
                                             shour = "00";
                                         if (selectedMinute == 0)
                                             sminute = "00";
-                                        if(shour.length()==1)
-                                        {
-                                            shour="0"+shour;
+                                        if (shour.length() == 1) {
+                                            shour = "0" + shour;
                                         }
-                                        if(sminute.length()==1)
-                                        {
-                                            sminute="0"+sminute;
+                                        if (sminute.length() == 1) {
+                                            sminute = "0" + sminute;
                                         }
 
                                         if (!(shour.equals("00") && sminute.equals("00")) && selectedHour < hour) {
@@ -597,25 +628,41 @@ public class PlaceOrder extends AppCompatActivity {
                                             Toast.makeText(PlaceOrder.this, "Please set time before restaurant closing time", Toast.LENGTH_SHORT).show();
                                         }*/
                                         else
-                                            txtschedule.setText("Scheduled at "+shour + ":" + sminute+" today");
-                                        Orderreceivetime = shour+":"+sminute;
+                                            txtschedule.setText("Scheduled at " + shour + ":" + sminute + " today");
+                                        Orderreceivetime = shour + ":" + sminute;
                                     }
                                 }, hour, minute, true);//Yes 24 hour time
                                 mTimePicker.setTitle("Select Today's Delivery Time");
                                 mTimePicker.show();
 
-                            }
-                            else if (isChecked && restaurantid.equals("1"))
-                            {
+                            } else if (cbschedule.isChecked() && restaurantid.equals("1")) {
                                 cbasap.setChecked(false);
+                                cbthird.setChecked(false);
                                 Orderreceivetime = "08:00 PM - 09:00 PM";
                             }
-
+                            else if(!cbschedule.isChecked())
+                            {
+                                cbschedule.setChecked(true);
+                            }
                         }
                     });
 
+                    cbthird.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(cbthird.isChecked()) {
+                                Orderreceivetime = "09:00 PM - 10:00 PM";
+                                cbasap.setChecked(false);
+                                cbschedule.setChecked(false);
+                            }
+                            else if(!cbthird.isChecked())
+                            {
+                                cbthird.setChecked(true);
+                            }
+                        }
+                    });
                     dialog.dismiss();
-
+                }
                 }
 
 
@@ -653,6 +700,9 @@ public class PlaceOrder extends AppCompatActivity {
             }
 
             //currentrequestsref.child(ttordersstr).child("restaurantname").setValue();
+
+
+
             Request request = new Request(
                     cart,
                     city,
@@ -694,7 +744,13 @@ public class PlaceOrder extends AppCompatActivity {
             //listenservice = new Intent(PlaceOrder.this,ListenOrder.class);
             //startService(listenservice);
 
-            sendNotificationOrder(ttordersstr);
+            boolean isadvorder;
+            if(Orderreceivetime.equals("ASAP"))
+                isadvorder=false;
+            else isadvorder=true;
+
+            sendNotificationOrder(ttordersstr,isadvorder);
+            sendNotificationOrderToAdmin(ttordersstr,isadvorder);
 
         }
         else
@@ -704,7 +760,7 @@ public class PlaceOrder extends AppCompatActivity {
     }
 
 
-    private void sendNotificationOrder(final String order_number) {
+    private void sendNotificationOrder(final String order_number, final boolean isadvorder) {
 
 
         DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
@@ -712,35 +768,93 @@ public class PlaceOrder extends AppCompatActivity {
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
-                {
-                    Token serverToken  = postSnapshot.getValue(Token.class);
+                if(dataSnapshot.getValue()!=null) {
 
-                    //create raw play load to send
-                    Notification notification = new Notification("Waiting for order confirmation...","You have new order #"+order_number.substring(1,order_number.length()),"ORDERS");
-                    Sender content = new Sender(serverToken.getToken(),notification);
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Token serverToken = postSnapshot.getValue(Token.class);
 
-                    mService.sendNotification(content)
-                            .enqueue(new Callback<MyResponse>() {
-                                @Override
-                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                        //create raw play load to send
+                        String click_action;
+                        if(isadvorder) click_action= "ADVORDERS";
+                        else click_action = "ORDERS";
+                        Notification notification = new Notification("Waiting for order confirmation...", "You have new order #" + order_number.substring(1, order_number.length()), click_action, "customer", "3");
+                        Sender content = new Sender(serverToken.getToken(), notification);
 
-                                    // if(response.code()==200){
-                                    if (response.body().success == 1) {
-                                        Toast.makeText(PlaceOrder.this, "Thankyou Order Placed !", Toast.LENGTH_SHORT).show();
-                                        finish();
-                                        //    }
-                                    }else {
-                                        Toast.makeText(PlaceOrder.this, "No Guest Admin !", Toast.LENGTH_SHORT).show();
+                        mService.sendNotification(content)
+                                .enqueue(new Callback<MyResponse>() {
+                                    @Override
+                                    public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+
+                                        // if(response.code()==200){
+                                        if (response.body().success == 1) {
+                                            Toast.makeText(PlaceOrder.this, "Thankyou Order Placed !", Toast.LENGTH_SHORT).show();
+                                            finish();
+                                            //    }
+                                        } else {
+                                            //Toast.makeText(PlaceOrder.this, "No Guest Admin !", Toast.LENGTH_SHORT).show();
+                                        }
+
                                     }
 
-                                }
+                                    @Override
+                                    public void onFailure(Call<MyResponse> call, Throwable t) {
+                                        Log.e("ERROR", t.getMessage());
+                                    }
+                                });
+                    }
+                }
+            }
 
-                                @Override
-                                public void onFailure(Call<MyResponse> call, Throwable t) {
-                                    Log.e("ERROR", t.getMessage());
-                                }
-                            });
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void sendNotificationOrderToAdmin(final String order_number, final boolean isadvorder) {
+
+
+        DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
+        Query data =tokens.orderByChild("city_zone_isserver").equalTo("allN/A1"); // get all node with server token is true
+        data.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!=null) {
+
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Token serverToken = postSnapshot.getValue(Token.class);
+
+                        //create raw play load to send
+                        String click_action;
+                        if(isadvorder) click_action= "ADVORDERS";
+                        else click_action = "ORDERS";
+                        Notification notification = new Notification("Waiting for order confirmation...", "You have new order #" + order_number.substring(1, order_number.length()), click_action, "customer", "3");
+                        Sender content = new Sender(serverToken.getToken(), notification);
+
+                        mService.sendNotification(content)
+                                .enqueue(new Callback<MyResponse>() {
+                                    @Override
+                                    public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+
+                                        // if(response.code()==200){
+                                        if (response.body().success == 1) {
+                                            Toast.makeText(PlaceOrder.this, "Thankyou Order Placed !", Toast.LENGTH_SHORT).show();
+                                            finish();
+                                            //    }
+                                        } else {
+                                            //Toast.makeText(PlaceOrder.this, "No Guest Admin !", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<MyResponse> call, Throwable t) {
+                                        Log.e("ERROR", t.getMessage());
+                                    }
+                                });
+                    }
                 }
             }
 

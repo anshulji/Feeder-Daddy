@@ -41,6 +41,7 @@ import java.util.Locale;
 import static com.dev.fd.feederdaddy.OrderMeal.deliverycharges;
 import static com.dev.fd.feederdaddy.OrderMeal.mindcdistance;
 import static com.dev.fd.feederdaddy.OrderMeal.mindeliverycharge;
+import static com.dev.fd.feederdaddy.OrderMeal.scdeliverycharges;
 import static com.dev.fd.feederdaddy.OrderMeal.userlongitude;
 
 class RestViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -144,12 +145,23 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestViewHolder>{
         restViewHolder.txtdistance.setText(dist+" km");
 
         //txt delivery rate
+        Double rate;
+        final Double mindeliverycharge;
+         final Double mindcdistance;
 
-        Double rate = Double.parseDouble(deliverycharges);
-        final Double mindcdistance = Double.parseDouble(OrderMeal.mindcdistance);
-        final Double mindeliverycharge= Double.parseDouble(OrderMeal.mindeliverycharge);
+        if(!listData.get(i).getId().equals("1")) {
+            rate = Double.parseDouble(deliverycharges);
+             mindcdistance = Double.parseDouble(OrderMeal.mindcdistance);
+             mindeliverycharge = Double.parseDouble(OrderMeal.mindeliverycharge);
+        }
+        else
+        {
+            rate = Double.parseDouble(scdeliverycharges);
+            mindcdistance = Double.parseDouble(OrderMeal.scmindcdistance);
+            mindeliverycharge = Double.parseDouble(OrderMeal.scmindeliverycharges);
+        }
         Double charge;
-        if(distance<mindcdistance)
+        if(distance< mindcdistance)
         {
             charge = mindeliverycharge;
         }

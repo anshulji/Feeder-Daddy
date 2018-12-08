@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dev.fd.feederdaddy.Common.Common;
 import com.dev.fd.feederdaddy.Interface.ItemClickListener;
 import com.dev.fd.feederdaddy.ViewHolder.FoodViewHolder;
 import com.dev.fd.feederdaddy.ViewHolder.RateFoodViewHolder;
@@ -118,84 +119,84 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
             databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    txtrestaurantname.setText(dataSnapshot.child("restaurantname").getValue().toString());
-                    txtrestaurantareaname.setText(dataSnapshot.child("restaurantareaname").getValue().toString());
-                    txthowwasrest.setText("How was "+dataSnapshot.child("restaurantname").getValue().toString()+"?");
+                    if(dataSnapshot.getValue()!=null) {
 
-                    Picasso.with(getBaseContext()).load(dataSnapshot.child("restaurantimage").getValue().toString()).fit().centerCrop().into(imgrestaurant);
+                        txtrestaurantname.setText(dataSnapshot.child("restaurantname").getValue().toString());
+                        txtrestaurantareaname.setText(dataSnapshot.child("restaurantareaname").getValue().toString());
+                        txthowwasrest.setText("How was " + dataSnapshot.child("restaurantname").getValue().toString() + "?");
 
-                    RestaurantId = dataSnapshot.child("restaurantid").getValue().toString();
+                        Picasso.with(getBaseContext()).load(dataSnapshot.child("restaurantimage").getValue().toString()).fit().centerCrop().into(imgrestaurant);
 
-                    //load foof list
-                    adapter =new FirebaseRecyclerAdapter<Order, RateFoodViewHolder>(Order.class,R.layout.rate_food_item_layout,RateFoodViewHolder.class,
-                            dataSnapshot.child("foods").getRef()
-                    ) {
-                        @Override
-                        protected void onDataChanged() {
-                            super.onDataChanged();
-                            recycler_food.setAdapter(adapter);
-                        }
+                        RestaurantId = dataSnapshot.child("restaurantid").getValue().toString();
 
-                        @Override
-                        protected void populateViewHolder(final RateFoodViewHolder viewHolder, final Order model, int position) {
-
-                            if(model.getFoodname().substring(0,7).equals("(AddOn)"))
-                            {
-                                viewHolder.rlview.setVisibility(GONE);
+                        //load foof list
+                        adapter = new FirebaseRecyclerAdapter<Order, RateFoodViewHolder>(Order.class, R.layout.rate_food_item_layout, RateFoodViewHolder.class,
+                                dataSnapshot.child("foods").getRef()
+                        ) {
+                            @Override
+                            protected void onDataChanged() {
+                                super.onDataChanged();
+                                recycler_food.setAdapter(adapter);
                             }
-                            else {
-                                viewHolder.rlview.setVisibility(View.VISIBLE);
 
-                                String Foodname = model.getFoodname();
-                                for (int i = 0; i < Foodname.length(); i++) {
-                                    if (Foodname.charAt(i) == ')') {
-                                        Foodname = Foodname.substring(i + 1, Foodname.length());
-                                        break;
-                                    }
-                                }
+                            @Override
+                            protected void populateViewHolder(final RateFoodViewHolder viewHolder, final Order model, int position) {
 
-                                if (foodnames.contains(Foodname))
+                                if (model.getFoodname().substring(0, 7).equals("(AddOn)")) {
                                     viewHolder.rlview.setVisibility(GONE);
-                                else {
+                                } else {
                                     viewHolder.rlview.setVisibility(View.VISIBLE);
-                                    foodnames.add(Foodname);
-                                }
 
-                                viewHolder.txtfoodname.setText(Foodname);
-
-
-                                viewHolder.imgratebtn.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-
-                                        MenuId = model.getMenuid();
-                                        FoodId = model.getFoodid();
-                                        foods = database.getReference(city).child("Foods").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
-                                        rating = database.getReference(city).child("Rating").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
-                                        restaurantrating = database.getReference(city).child("Restaurant").child(RestaurantId);
-                                        menurating = database.getReference(city).child("Menus").child(RestaurantId).child(model.getMenuid());
-
-                                        viewHolder.imgratebtn.setImageResource(R.drawable.order_delivered);
-                                        foods.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                currentFood = dataSnapshot.getValue(Food.class);
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                            }
-                                        });
-                                        showRatingDialog();
-
+                                    String Foodname = model.getFoodname();
+                                    for (int i = 0; i < Foodname.length(); i++) {
+                                        if (Foodname.charAt(i) == ')') {
+                                            Foodname = Foodname.substring(i + 1, Foodname.length());
+                                            break;
+                                        }
                                     }
-                                });
+
+                                    if (foodnames.contains(Foodname))
+                                        viewHolder.rlview.setVisibility(GONE);
+                                    else {
+                                        viewHolder.rlview.setVisibility(View.VISIBLE);
+                                        foodnames.add(Foodname);
+                                    }
+
+                                    viewHolder.txtfoodname.setText(Foodname);
+
+
+                                    viewHolder.imgratebtn.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+
+                                            MenuId = model.getMenuid();
+                                            FoodId = model.getFoodid();
+                                            foods = database.getReference(city).child("Foods").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
+                                            rating = database.getReference(city).child("Rating").child(RestaurantId).child(model.getMenuid()).child(model.getFoodid());
+                                            restaurantrating = database.getReference(city).child("Restaurant").child(RestaurantId);
+                                            menurating = database.getReference(city).child("Menus").child(RestaurantId).child(model.getMenuid());
+
+                                            viewHolder.imgratebtn.setImageResource(R.drawable.order_delivered);
+                                            foods.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    currentFood = dataSnapshot.getValue(Food.class);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                            showRatingDialog();
+
+                                        }
+                                    });
+                                }
                             }
-                        }
-                    };
+                        };
 
-
+                    }
                 }
 
                 @Override
@@ -244,37 +245,43 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
     public void onPositiveButtonClicked(final int values, String comments) {
         //get rating and upload to  firebase
 
+        if(Common.isConnectedToInternet(getBaseContext())) {
+            if(!comments.equalsIgnoreCase("")) {
+                value = values;
+                phone = sharedPreferences.getString("phone", "N/A");
+                name = sharedPreferences.getString("name", "N/A");
 
-        if(!comments.equalsIgnoreCase("")) {
-            value = values;
-            phone = sharedPreferences.getString("phone", "N/A");
-            name = sharedPreferences.getString("name", "N/A");
+                ratin = new Rating(name, comments, String.valueOf(value));
 
-            ratin = new Rating(name, comments, String.valueOf(value));
+                rating.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.getValue()!=null) {
 
-            rating.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.child(phone).exists()) {
-                        flag = 1;
-                        String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
-                        oldrating = Double.parseDouble(oldrat);
-                        updaterating();
-                    } else {
-                        flag = 0;
-                        updaterating();
+                            if (dataSnapshot.child(phone).exists()) {
+                                flag = 1;
+                                String oldrat = dataSnapshot.child(phone).child("rate").getValue().toString();
+                                oldrating = Double.parseDouble(oldrat);
+                                updaterating();
+                            } else {
+                                flag = 0;
+                                updaterating();
+                            }
+                        }
                     }
 
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
+            else
+                Toast.makeText(this, "Comment couldn't be empty!", Toast.LENGTH_SHORT).show();
 
-                }
-            });
         }
         else
-            Toast.makeText(this, "Comment couldn't be empty!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -310,20 +317,23 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
         menurating.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String mprevrating = dataSnapshot.child("rating").getValue().toString();
-                String mprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
-                Double mdprevrating = Double.parseDouble(mprevrating);
-                Double mdprevtotalrates =Double.parseDouble(mprevtotalrates);
-                Double mprod =mdprevrating * mdprevtotalrates;
-                mprod += value-oldrating;
+                if(dataSnapshot.getValue()!=null) {
 
-                if(flag==0)
-                    mdprevtotalrates+=1.0;
+                    String mprevrating = dataSnapshot.child("rating").getValue().toString();
+                    String mprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
+                    Double mdprevrating = Double.parseDouble(mprevrating);
+                    Double mdprevtotalrates = Double.parseDouble(mprevtotalrates);
+                    Double mprod = mdprevrating * mdprevtotalrates;
+                    mprod += value - oldrating;
 
-                mprod =mprod/mdprevtotalrates;
-                menurating.child("rating").setValue(String.valueOf(mprod));
-                String ntotalrates = String.format("%.0f",mdprevtotalrates);
-                menurating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                    if (flag == 0)
+                        mdprevtotalrates += 1.0;
+
+                    mprod = mprod / mdprevtotalrates;
+                    menurating.child("rating").setValue(String.valueOf(mprod));
+                    String ntotalrates = String.format("%.0f", mdprevtotalrates);
+                    menurating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                }
             }
 
             @Override
@@ -337,21 +347,24 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
         restaurantrating.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String rprevrating = dataSnapshot.child("rating").getValue().toString();
-                String rprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
-                Double rdprevrating = Double.parseDouble(rprevrating);
-                Double rdprevtotalrates =Double.parseDouble(rprevtotalrates);
-                Double rprod =rdprevrating * rdprevtotalrates;
-                rprod += value-oldrating;
+                if(dataSnapshot.getValue()!=null) {
 
-                if(flag==0)
-                    rdprevtotalrates+=1.0;
+                    String rprevrating = dataSnapshot.child("rating").getValue().toString();
+                    String rprevtotalrates = dataSnapshot.child("totalrates").getValue().toString();
+                    Double rdprevrating = Double.parseDouble(rprevrating);
+                    Double rdprevtotalrates = Double.parseDouble(rprevtotalrates);
+                    Double rprod = rdprevrating * rdprevtotalrates;
+                    rprod += value - oldrating;
 
-                rprod =rprod/rdprevtotalrates;
-                restaurantrating.child("rating").setValue(String.valueOf(rprod));
+                    if (flag == 0)
+                        rdprevtotalrates += 1.0;
 
-                String ntotalrates = String.format("%.0f",rdprevtotalrates);
-                restaurantrating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                    rprod = rprod / rdprevtotalrates;
+                    restaurantrating.child("rating").setValue(String.valueOf(rprod));
+
+                    String ntotalrates = String.format("%.0f", rdprevtotalrates);
+                    restaurantrating.child("totalrates").setValue(String.valueOf(ntotalrates));
+                }
             }
 
             @Override

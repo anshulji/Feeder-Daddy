@@ -98,7 +98,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     String isbakerystr,city;
 
     SharedPreferences sharedPreferences;
-    public static String phone,userlatitude,userlongitude,deliverycharges,mindeliverycharge,mindcdistance;
+    public static String phone,userlatitude,userlongitude,deliverycharges,mindeliverycharge,mindcdistance,scdeliverycharges,scmindeliverycharges,scmindcdistance;
 
     //slider
     HashMap<String, String> image_list;
@@ -191,126 +191,147 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                     R.anim.layout_slide_right);
             recylermenu.setLayoutAnimation(controller);
 
+            DatabaseReference dbref = database.getReference(city).child("ShaChickenDC");
+            dbref.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.getValue() != null) {
 
-            refdelivercharges = database.getReference(city).child("DeliveryCharges");
+                                                    scmindcdistance =dataSnapshot.child("mindcdistance").getValue().toString();
+                                                    scdeliverycharges = dataSnapshot.child("deliverychargeperkm").getValue().toString();
+                                                    scmindeliverycharges = dataSnapshot.child("mindeliverycharge").getValue().toString();
+
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+
+                    refdelivercharges = database.getReference(city).child("DeliveryCharges");
 
             refdelivercharges.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    deliverycharges = dataSnapshot.child("deliverychargeperkm").getValue().toString();
-                    mindeliverycharge = dataSnapshot.child("mindeliverycharge").getValue().toString();
-                    mindcdistance = dataSnapshot.child("mindcdistance").getValue().toString();
+                    if(dataSnapshot.getValue()!=null) {
 
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("deliveryrate",deliverycharges);
-                    editor.putString("mindeliverycharge",mindeliverycharge);
-                    editor.putString("mindcdistance",mindcdistance);
-                    editor.commit();
+                        deliverycharges = dataSnapshot.child("deliverychargeperkm").getValue().toString();
+                        mindeliverycharge = dataSnapshot.child("mindeliverycharge").getValue().toString();
+                        mindcdistance = dataSnapshot.child("mindcdistance").getValue().toString();
 
-                    //load restlist
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.VISIBLE);
-                    }
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("deliveryrate", deliverycharges);
+                        editor.putString("mindeliverycharge", mindeliverycharge);
+                        editor.putString("mindcdistance", mindcdistance);
+                        editor.commit();
 
-                    restaurant.orderByChild("isbakery").equalTo(isbakerystr).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            restaurantList.clear();
-                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                Restaurant res = postSnapshot.getValue(Restaurant.class);
-                                restaurantList.add(res);
-                                //HotDealsList.add(Integer.parseInt(postSnapshot.getKey()),res);
-                            }
-                            restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
-                            //recylermenu.setAdapter(restaurantAdapter);
+                        //load restlist
+                        if (progressBar != null) {
+                            progressBar.setVisibility(View.VISIBLE);
+                        }
 
-                            if (progressBar != null) {
-                                progressBar.setVisibility(View.GONE);
-                            }
+                        restaurant.orderByChild("isbakery").equalTo(isbakerystr).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                restaurantList.clear();
+                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                    Restaurant res = postSnapshot.getValue(Restaurant.class);
+                                    restaurantList.add(res);
+                                    //HotDealsList.add(Integer.parseInt(postSnapshot.getKey()),res);
+                                }
+                                restaurantAdapter = new RestaurantAdapter(restaurantList, OrderMeal.this.getActivity());
+                                //recylermenu.setAdapter(restaurantAdapter);
 
-                            loadAnimation();
-
-                            loadSuggest();
-
-                            materialSearchBar.setLastSuggestions(SuggestList);
-                            materialSearchBar.setCardViewElevation(0);
-                            materialSearchBar.addTextChangeListener(new TextWatcher() {
-                                @Override
-                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                                if (progressBar != null) {
+                                    progressBar.setVisibility(View.GONE);
                                 }
 
-                                @Override
-                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                    List<String> suggest = new ArrayList<>();
-                                    for (String search : SuggestList) {
-                                        if (search.toLowerCase().contains(materialSearchBar.getText().toLowerCase())) {
-                                            suggest.add(search);
+                                loadAnimation();
+
+                                loadSuggest();
+
+                                materialSearchBar.setLastSuggestions(SuggestList);
+                                materialSearchBar.setCardViewElevation(0);
+                                materialSearchBar.addTextChangeListener(new TextWatcher() {
+                                    @Override
+                                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                    }
+
+                                    @Override
+                                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                        List<String> suggest = new ArrayList<>();
+                                        for (String search : SuggestList) {
+                                            if (search.toLowerCase().contains(materialSearchBar.getText().toLowerCase())) {
+                                                suggest.add(search);
+                                            }
+                                        }
+                                        materialSearchBar.setLastSuggestions(suggest);
+                                    }
+
+                                    @Override
+                                    public void afterTextChanged(Editable editable) {
+
+                                    }
+                                });
+
+
+                                materialSearchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+                                    @Override
+                                    public void OnItemClickListener(int position, View v) {
+                                        startSearch(SuggestList.get(position));
+                                        materialSearchBar.hideSuggestionsList();
+                                        materialSearchBar.setText(SuggestList.get(position));
+                                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                                    }
+
+                                    @Override
+                                    public void OnItemDeleteListener(int position, View v) {
+
+                                    }
+                                });
+
+                                materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+                                    @Override
+                                    public void onSearchStateChanged(boolean enabled) {
+                                        //when search bar is close
+                                        //restore original adapter
+                                        if (!enabled) {
+                                            recylermenu.setAdapter(restaurantAdapter);
                                         }
                                     }
-                                    materialSearchBar.setLastSuggestions(suggest);
-                                }
 
-                                @Override
-                                public void afterTextChanged(Editable editable) {
-
-                                }
-                            });
-
-
-                            materialSearchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
-                                @Override
-                                public void OnItemClickListener(int position, View v) {
-                                    startSearch(SuggestList.get(position));
-                                    materialSearchBar.hideSuggestionsList();
-                                    materialSearchBar.setText(SuggestList.get(position));
-                                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-                                }
-
-                                @Override
-                                public void OnItemDeleteListener(int position, View v) {
-
-                                }
-                            });
-
-                            materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
-                                @Override
-                                public void onSearchStateChanged(boolean enabled) {
-                                    //when search bar is close
-                                    //restore original adapter
-                                    if (!enabled) {
-                                        recylermenu.setAdapter(restaurantAdapter);
+                                    @Override
+                                    public void onSearchConfirmed(CharSequence text) {
+                                        //when search finish
+                                        //show result of search adapter
+                                        startSearch(text);
                                     }
-                                }
 
-                                @Override
-                                public void onSearchConfirmed(CharSequence text) {
-                                    //when search finish
-                                    //show result of search adapter
-                                    startSearch(text);
-                                }
+                                    @Override
+                                    public void onButtonClicked(int buttonCode) {
 
-                                @Override
-                                public void onButtonClicked(int buttonCode) {
-
-                                }
-                            });
+                                    }
+                                });
 
 
-                        }
+                            }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        }
-                    });
+                            }
+                        });
 
 
-                    //search bar
-                    materialSearchBar = view.findViewById(R.id.SearchBar);
-                    materialSearchBar.setHint("Enter Restaurant Name");
-
+                        //search bar
+                        materialSearchBar = view.findViewById(R.id.SearchBar);
+                        materialSearchBar.setHint("Enter Restaurant Name");
+                    }
                 }
 
                 @Override
@@ -430,40 +451,40 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         menubannerref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
-                {
-                    strbannername = postSnapshot.child("name").getValue().toString();
-                    strbannerimageurl = postSnapshot.child("image").getValue().toString();
-                    // we will concat string name and id
-                    image_list.put(strbannername,strbannerimageurl);
-
-                }
-
-                for (String key: image_list.keySet())
-                {
-                    String[] keySplit = key.split("@#@");
-                    String nameoffood = keySplit[0];
-
-                    //create slider
-                    TextSliderView textSliderView =new TextSliderView(getActivity());
-                    textSliderView.description(nameoffood)
-                            .image(image_list.get(key))
-                            .setScaleType(BaseSliderView.ScaleType.CenterCrop);
-
-                    sliderLayout.addSlider(textSliderView);
+                if(dataSnapshot.getValue()!=null) {
 
 
-                }
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        strbannername = postSnapshot.child("name").getValue().toString();
+                        strbannerimageurl = postSnapshot.child("image").getValue().toString();
+                        // we will concat string name and id
+                        image_list.put(strbannername, strbannerimageurl);
 
-                new Handler().postDelayed(new Runnable(){
-                    @Override
-                    public void run() {
-                        sliderLayout.setVisibility(View.VISIBLE);
                     }
-                }, 1000);
+
+                    for (String key : image_list.keySet()) {
+                        String[] keySplit = key.split("@#@");
+                        String nameoffood = keySplit[0];
+
+                        //create slider
+                        TextSliderView textSliderView = new TextSliderView(getActivity());
+                        textSliderView.description(nameoffood)
+                                .image(image_list.get(key))
+                                .setScaleType(BaseSliderView.ScaleType.CenterCrop);
+
+                        sliderLayout.addSlider(textSliderView);
 
 
+                    }
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sliderLayout.setVisibility(View.VISIBLE);
+                        }
+                    }, 1000);
+
+                }
             }
 
             @Override
@@ -579,22 +600,23 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         restaurant.orderByChild("name").equalTo(text.toString()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                searchedList.clear();
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
-                {
-                    Restaurant res = postSnapshot.getValue(Restaurant.class);
+                if(dataSnapshot.getValue()!=null) {
 
-                    searchedList.add(res);
+                    searchedList.clear();
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Restaurant res = postSnapshot.getValue(Restaurant.class);
+
+                        searchedList.add(res);
+                    }
+                    searchAdapter = new RestaurantAdapter(searchedList, OrderMeal.this.getActivity());
+                    //recylermenu.setAdapter(searchAdapter);
+
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    recylermenu.setAdapter(searchAdapter);
                 }
-                searchAdapter = new RestaurantAdapter(searchedList,OrderMeal.this.getActivity());
-                //recylermenu.setAdapter(searchAdapter);
-
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-
-                recylermenu.setAdapter(searchAdapter);
-
             }
 
             @Override
@@ -611,7 +633,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
         recylermenu.setAdapter(restaurantAdapter);
         //animation
         recylermenu.getAdapter().notifyDataSetChanged();
-        recylermenu.scheduleLayoutAnimation();
+       // recylermenu.scheduleLayoutAnimation();
     }
 
     private void loadSuggest() {

@@ -7,12 +7,18 @@
     android:animateLayoutChanges="true"
     android:paddingHorizontal="30dp"
     tools:context=".SignUpActivity">
-    <RelativeLayout
+
+    <ScrollView
         android:id="@+id/verifyotplayout"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_centerInParent="true"
+        android:animateLayoutChanges="true"
+        android:scrollIndicators="none"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <RelativeLayout
         android:layout_below="@+id/fdlogo"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:animateLayoutChanges="true"
         android:layout_height="wrap_content">
 
@@ -103,14 +109,20 @@
 
 
     </RelativeLayout>
-    <RelativeLayout
+    </ScrollView>
+    <ScrollView
+        android:layout_width="match_parent"
         android:id="@+id/rlddress"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_centerInParent="true"
+        android:animateLayoutChanges="true"
+        android:layout_height="wrap_content">
+    <RelativeLayout
+
         android:layout_toRightOf="@+id/verifyotplayout"
         android:layout_width="match_parent"
         android:animateLayoutChanges="true"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
@@ -341,6 +353,6 @@
             android:background="@drawable/bt_bg"
             />
     </RelativeLayout>
-
+    </ScrollView>
 
 </RelativeLayout>

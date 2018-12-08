@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:visibility="invisible"
-            app:backgroundTint="@android:color/white"
+            android:background="@color/white"
             app:layout_anchor="@id/app_bar_layout"
             app:layout_anchorGravity="bottom|end|right"
             app:srcCompat="@drawable/ic_shopping_cart_black_24dp"
@@ -609,13 +609,14 @@
 
         <RelativeLayout
             android:id="@+id/rlcart"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
             android:layout_marginTop="20dp"
             android:elevation="8dp"
             app:layout_anchor="@id/btnCart0"
             app:layout_anchorGravity="center"
             app:pressedTranslationZ="12dp"
+
             app:useCompatPadding="true"
             tools:ignore="VectorDrawableCompat">
 
@@ -626,9 +627,8 @@
                 android:layout_centerInParent="true"
                 android:layout_margin="10dp"
                 app:backgroundTint="@android:color/white"
-                app:srcCompat="@drawable/ic_shopping_cart_black_24dp"
+                android:src="@drawable/ic_shopping_cart_black_24dp"
                 tools:ignore="VectorDrawableCompat"
-
                 />
 
             <TextView

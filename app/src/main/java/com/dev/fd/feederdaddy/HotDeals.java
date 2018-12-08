@@ -65,7 +65,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
 
     ProgressBar progressBar;
 
-    String city,isopen="1";
+    String city,isopen="1",restaurantdiscount="0";
 
     SharedPreferences sharedPreferences;
     public static String phone,userlatitude,userlongitude,deliverycharges;
@@ -175,16 +175,21 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
             //init firebase
             database = FirebaseDatabase.getInstance();
             HotDealsRef = database.getReference(city).child("Foods").child("-1").child("1");
-            restref  = database.getReference(city).child("Restaurant").child("-1").child("isopen");
+            restref  = database.getReference(city).child("Restaurant").child("-1");
 
             restref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue().toString().equals("1"))
-                        isopen="1";
-                    else
-                    {isopen="0";
-                        toolbar.setTitle("Hot Deals (Currently Closed)");
+                    if(dataSnapshot.getValue()!=null) {
+
+                        if (dataSnapshot.child("isopen").getValue().toString().equals("1"))
+                            isopen = "1";
+                        else {
+                            isopen = "0";
+                            toolbar.setTitle("Hot Deals (Currently Closed)");
+                        }
+
+                        restaurantdiscount = dataSnapshot.child("restaurantdiscount").getValue().toString();
                     }
                 }
 
@@ -259,6 +264,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
                                         editor.putString("deliveryrate","0");
                                         editor.putString("mindcdistance", "0.0");
                                         editor.putString("mindeliverycharge","0");
+                                        editor.putString("restaurantdiscount",restaurantdiscount);
                                         editor.commit();
                                         Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                         fooddetail.putExtra("isHotDeal","1");
@@ -286,6 +292,7 @@ public class HotDeals extends Fragment implements NavigationView.OnNavigationIte
                                 editor.putString("deliveryrate","0");
                                 editor.putString("mindcdistance", "0.0");
                                 editor.putString("mindeliverycharge","0");
+                                editor.putString("restaurantdiscount",restaurantdiscount);
                                 editor.commit();
                                 Intent fooddetail = new Intent(getActivity(),FoodDetails.class);
                                 fooddetail.putExtra("isHotDeal","1");

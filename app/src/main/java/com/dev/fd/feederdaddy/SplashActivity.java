@@ -27,7 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 public class SplashActivity extends AppCompatActivity {
 
 
-    private static final String APP_VERSION = "1.0";
+    private static final String APP_VERSION = "1.1";
     private String app_version,phone;
 
 

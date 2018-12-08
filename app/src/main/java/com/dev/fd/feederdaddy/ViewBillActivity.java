@@ -93,31 +93,31 @@ public class ViewBillActivity extends AppCompatActivity {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                txtrestname.setText(dataSnapshot.child("restaurantname").getValue().toString());
-                Picasso.with(getBaseContext()).load(dataSnapshot.child("restaurantimage").getValue().toString()).into(imgrestimage);
-                txtdeliverycharge.setText("₹"+dataSnapshot.child("deliverycharge").getValue().toString());
-                txtuseraddress.setText(dataSnapshot.child("customeraddress").getValue().toString());
-                txttotal.setText("₹"+dataSnapshot.child("totalamount").getValue().toString());
-                if(!dataSnapshot.child("promocode").getValue().toString().equals("null"))
-                {
-                    llpromobill.setVisibility(View.VISIBLE);
-                    txtpromocodename.setText(dataSnapshot.child("promocode").getValue().toString());
-                    txtpromocodeamount.setText("-₹"+dataSnapshot.child("promoamount").getValue().toString());
-                    int totalamnt = Integer.parseInt(dataSnapshot.child("totalamount").getValue().toString());
-                    int promoamnt = Integer.parseInt(dataSnapshot.child("promoamount").getValue().toString());
-                    int deliverycharge = Integer.parseInt(dataSnapshot.child("deliverycharge").getValue().toString());
-                    int subtotal = totalamnt-deliverycharge+promoamnt;
-                    txtsubltotal.setText("₹"+subtotal);
+                if(dataSnapshot.getValue()!=null) {
+
+                    txtrestname.setText(dataSnapshot.child("restaurantname").getValue().toString());
+                    Picasso.with(getBaseContext()).load(dataSnapshot.child("restaurantimage").getValue().toString()).into(imgrestimage);
+                    txtdeliverycharge.setText("₹" + dataSnapshot.child("deliverycharge").getValue().toString());
+                    txtuseraddress.setText(dataSnapshot.child("customeraddress").getValue().toString());
+                    txttotal.setText("₹" + dataSnapshot.child("totalamount").getValue().toString());
+                    if (!dataSnapshot.child("promocode").getValue().toString().equals("null")) {
+                        llpromobill.setVisibility(View.VISIBLE);
+                        txtpromocodename.setText(dataSnapshot.child("promocode").getValue().toString());
+                        txtpromocodeamount.setText("-₹" + dataSnapshot.child("promoamount").getValue().toString());
+                        int totalamnt = Integer.parseInt(dataSnapshot.child("totalamount").getValue().toString());
+                        int promoamnt = Integer.parseInt(dataSnapshot.child("promoamount").getValue().toString());
+                        int deliverycharge = Integer.parseInt(dataSnapshot.child("deliverycharge").getValue().toString());
+                        int subtotal = totalamnt - deliverycharge + promoamnt;
+                        txtsubltotal.setText("₹" + subtotal);
+                    }
+
+                    for (DataSnapshot postSnapshot : dataSnapshot.child("foods").getChildren()) {
+                        orderlist.add(postSnapshot.getValue(Order.class));
+                    }
+
+                    adapter = new BillAdapter(orderlist, ViewBillActivity.this);
+                    rvbill.setAdapter(adapter);
                 }
-
-                for(DataSnapshot postSnapshot : dataSnapshot.child("foods").getChildren())
-                {
-                  orderlist.add(postSnapshot.getValue(Order.class));
-                }
-
-                adapter = new BillAdapter(orderlist,ViewBillActivity.this);
-                rvbill.setAdapter(adapter);
-
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

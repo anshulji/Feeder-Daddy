@@ -34,10 +34,12 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dev.fd.feederdaddy.Common.Common;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -95,7 +97,7 @@ public class SignUpActivity extends AppCompatActivity {
     private int btntype = 0, tm = 1, flag = 0, fg = 0;
     PhoneAuthProvider.ForceResendingToken mResendToken;
     String phoneNumber, phoneno, username;
-    RelativeLayout rlverifyotp, rlenteraddress;
+    ScrollView rlverifyotp, rlenteraddress;
 
     private static final String TAG = "SignUpActitvity";
     private static final int ERROR_DIALOG_REQUEST = 9001;
@@ -147,68 +149,74 @@ public class SignUpActivity extends AppCompatActivity {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
-                {
-                    categories.add(postSnapshot.getValue().toString());
-                }
-                // Creating adapter for spinner
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(SignUpActivity.this, android.R.layout.simple_spinner_item, categories);
+                if(dataSnapshot.getValue()!=null) {
 
-                // Drop down layout style - list view with radio button
-                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        categories.add(postSnapshot.getValue().toString());
+                    }
+                    // Creating adapter for spinner
+                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(SignUpActivity.this, android.R.layout.simple_spinner_item, categories);
 
-                // attaching data adapter to spinner
-                cityspinner.setAdapter(dataAdapter);
+                    // Drop down layout style - list view with radio button
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-                cityspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        city = parent.getItemAtPosition(position).toString();
+                    // attaching data adapter to spinner
+                    cityspinner.setAdapter(dataAdapter);
 
-                        zoneref = firebaseDatabase.getReference(city).child("Zones");
-                        final List<String> zoneslist = new ArrayList<String>();
-                        zoneref.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    zoneslist.add(postSnapshot.getValue().toString());
+                    cityspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            city = parent.getItemAtPosition(position).toString();
+
+                            zoneref = firebaseDatabase.getReference(city).child("Zones");
+                            final List<String> zoneslist = new ArrayList<String>();
+                            zoneref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if(dataSnapshot.getValue()!=null) {
+
+                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                            zoneslist.add(postSnapshot.getValue().toString());
+                                        }
+
+                                        // Creating adapter for spinner
+                                        ArrayAdapter<String> zoneadapter = new ArrayAdapter<String>(SignUpActivity.this, android.R.layout.simple_spinner_item, zoneslist);
+
+                                        // Drop down layout style - list view with radio button
+                                        zoneadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                                        // attaching data adapter to spinner
+                                        zonespinner.setAdapter(zoneadapter);
+                                        zonespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                            @Override
+                                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                zone = parent.getItemAtPosition(position).toString();
+                                            }
+
+                                            @Override
+                                            public void onNothingSelected(AdapterView<?> parent) {
+
+                                            }
+                                        });
+                                    }
+
                                 }
 
-                                // Creating adapter for spinner
-                                ArrayAdapter<String> zoneadapter = new ArrayAdapter<String>(SignUpActivity.this, android.R.layout.simple_spinner_item, zoneslist);
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                // Drop down layout style - list view with radio button
-                                zoneadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                                // attaching data adapter to spinner
-                                zonespinner.setAdapter(zoneadapter);
-                                zonespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                                    @Override
-                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                        zone = parent.getItemAtPosition(position).toString();
-                                    }
-
-                                    @Override
-                                    public void onNothingSelected(AdapterView<?> parent) {
-
-                                    }
-                                });
-
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                                }
+                            });
 
 
-                    }
+                        }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        city  = "Varanasi";
-                    }
-                });
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            city = "Varanasi";
+                        }
+                    });
+                }
 
             }
 
@@ -303,8 +311,11 @@ public class SignUpActivity extends AppCompatActivity {
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
-                if (tm != 0)
+                if (tm != 0) {
                     Toast.makeText(SignUpActivity.this, "No Internet Connection!", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onVerificationFailed: ",e );
+                }
+
             }
 
             @Override
@@ -335,68 +346,74 @@ public class SignUpActivity extends AppCompatActivity {
         btnsignin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (edtroomnumber.getText().toString().equals(""))
-                    Toast.makeText(SignUpActivity.this, "Please enter Flat/House/Room No.", Toast.LENGTH_SHORT).show();
-                else if (edthostelname.getText().toString().equals(""))
-                    Toast.makeText(SignUpActivity.this, "Please enter Street/Society/Hostel Name", Toast.LENGTH_SHORT).show();
-                else if (edtlandmark.getText().toString().equals(""))
-                    Toast.makeText(SignUpActivity.this, "Please enter Landmark", Toast.LENGTH_SHORT).show();
-                //else if (currentAddtv.getText().toString().equals(""))
-                  //  Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
-                else if (shippingAddress==null && addressassigned.equals(""))
-                  Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
-                else {
-                    // address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                      //      edtlandmark.getText().toString() + ", " + currentAddtv.getText().toString();
-                    if(addressassigned.equals("")) {
-                        address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                                edtlandmark.getText().toString() + ", " + shippingAddress.getAddress().toString();
-                        LatLng ll=shippingAddress.getLatLng();
-                        latitude=ll.latitude;
-                        longitude=ll.longitude;
-                        locationstr = shippingAddress.getAddress().toString();
-                    }
+                if(Common.isConnectedToInternet(getBaseContext())) {
+                    if (edtroomnumber.getText().toString().equals(""))
+                        Toast.makeText(SignUpActivity.this, "Please enter Flat/House/Room No.", Toast.LENGTH_SHORT).show();
+                    else if (edthostelname.getText().toString().equals(""))
+                        Toast.makeText(SignUpActivity.this, "Please enter Street/Society/Hostel Name", Toast.LENGTH_SHORT).show();
+                    else if (edtlandmark.getText().toString().equals(""))
+                        Toast.makeText(SignUpActivity.this, "Please enter Landmark", Toast.LENGTH_SHORT).show();
+                        //else if (currentAddtv.getText().toString().equals(""))
+                        //  Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
+                    else if (shippingAddress==null && addressassigned.equals(""))
+                        Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
                     else {
-                        address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                                edtlandmark.getText().toString() + ", " + addressassigned;
-                        locationstr = addressassigned;
+                        // address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                        //      edtlandmark.getText().toString() + ", " + currentAddtv.getText().toString();
+                        if(addressassigned.equals("")) {
+                            address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                                    edtlandmark.getText().toString() + ", " + shippingAddress.getAddress().toString();
+                            LatLng ll=shippingAddress.getLatLng();
+                            latitude=ll.latitude;
+                            longitude=ll.longitude;
+                            locationstr = shippingAddress.getAddress().toString();
+                        }
+                        else {
+                            address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                                    edtlandmark.getText().toString() + ", " + addressassigned;
+                            locationstr = addressassigned;
+                        }
+                        Toast.makeText(SignUpActivity.this, "Signing in...", Toast.LENGTH_SHORT).show();
+
+                        databaseReference = firebaseDatabase.getReference("Varanasi").child("Users").child(phoneno);
+                        databaseReference.child("userphone").setValue(phoneno);
+                        databaseReference.child("username").setValue(username);
+                        databaseReference.child("useraddress").setValue(address);
+                        databaseReference.child("userlatitude").setValue(String.valueOf(latitude));
+                        databaseReference.child("userlongitude").setValue(String.valueOf(longitude));
+                        databaseReference.child("userzone").setValue(zone);
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("phone", phoneno);
+                        if(latitude!=0)
+                            editor.putString("latitude",String.valueOf(latitude));
+                        if(longitude!=0)
+                            editor.putString("longitude",String.valueOf(longitude));
+                        editor.putString("address",address);
+                        editor.putString("city",city);
+                        editor.putString("zone",zone);
+                        editor.putString("roomnumber",edtroomnumber.getText().toString());
+                        editor.putString("hostelname",edthostelname.getText().toString());
+                        editor.putString("landmark",edtlandmark.getText().toString());
+                        editor.putString("location",locationstr);
+                        editor.putString("name", username);
+                        //editor.putString("address",address);
+                        editor.commit();
+
+                        //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
+                        //      .commit();
+
+                        Toast.makeText(SignUpActivity.this, "Signed In Successfully !", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
-                    Toast.makeText(SignUpActivity.this, "Signing in...", Toast.LENGTH_SHORT).show();
-
-                    databaseReference = firebaseDatabase.getReference("Varanasi").child("Users").child(phoneno);
-                    databaseReference.child("userphone").setValue(phoneno);
-                    databaseReference.child("username").setValue(username);
-                    databaseReference.child("useraddress").setValue(address);
-                    databaseReference.child("userlatitude").setValue(String.valueOf(latitude));
-                    databaseReference.child("userlongitude").setValue(String.valueOf(longitude));
-                    databaseReference.child("userzone").setValue(zone);
-
-                    SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("phone", phoneno);
-                    if(latitude!=0)
-                    editor.putString("latitude",String.valueOf(latitude));
-                    if(longitude!=0)
-                    editor.putString("longitude",String.valueOf(longitude));
-                    editor.putString("address",address);
-                    editor.putString("city",city);
-                    editor.putString("zone",zone);
-                    editor.putString("roomnumber",edtroomnumber.getText().toString());
-                    editor.putString("hostelname",edthostelname.getText().toString());
-                    editor.putString("landmark",edtlandmark.getText().toString());
-                    editor.putString("location",locationstr);
-                    editor.putString("name", username);
-                    //editor.putString("address",address);
-                    editor.commit();
-
-                    //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
-                      //      .commit();
-
-                    Toast.makeText(SignUpActivity.this, "Signed In Successfully !", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
                 }
+                else
+                    Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
+
+
             }
         });
 

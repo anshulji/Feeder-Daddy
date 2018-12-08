@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dev.fd.feederdaddy.Common.Common;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.Status;
@@ -166,74 +167,79 @@ public class ProfileActivity extends AppCompatActivity {
         btnupdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (edtroomnumber.getText().toString().equals(""))
-                    Toast.makeText(ProfileActivity.this, "Please enter Flat/House/Room No.", Toast.LENGTH_SHORT).show();
-                else if (edthostelname.getText().toString().equals(""))
-                    Toast.makeText(ProfileActivity.this, "Please enter Street/Society/Hostel Name", Toast.LENGTH_SHORT).show();
-                else if (edtlandmark.getText().toString().equals(""))
-                    Toast.makeText(ProfileActivity.this, "Please enter Landmark", Toast.LENGTH_SHORT).show();
-                    //else if (currentAddtv.getText().toString().equals(""))
-                    //  Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
-                else if (shippingAddress==null && addressassigned.equals(""))
-                    Toast.makeText(ProfileActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
-                else {
-                    // address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                    //      edtlandmark.getText().toString() + ", " + currentAddtv.getText().toString();
-                    if(addressassigned.equals("")) {
-                        address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                                edtlandmark.getText().toString() + ", " + shippingAddress.getAddress().toString();
-                        LatLng ll=shippingAddress.getLatLng();
-                        latitude=ll.latitude;
-                        longitude=ll.longitude;
-                        location = shippingAddress.getAddress().toString();
-
-                    }
+                if(Common.isConnectedToInternet(getBaseContext())) {
+                    if (edtroomnumber.getText().toString().equals(""))
+                        Toast.makeText(ProfileActivity.this, "Please enter Flat/House/Room No.", Toast.LENGTH_SHORT).show();
+                    else if (edthostelname.getText().toString().equals(""))
+                        Toast.makeText(ProfileActivity.this, "Please enter Street/Society/Hostel Name", Toast.LENGTH_SHORT).show();
+                    else if (edtlandmark.getText().toString().equals(""))
+                        Toast.makeText(ProfileActivity.this, "Please enter Landmark", Toast.LENGTH_SHORT).show();
+                        //else if (currentAddtv.getText().toString().equals(""))
+                        //  Toast.makeText(SignUpActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
+                    else if (shippingAddress==null && addressassigned.equals(""))
+                        Toast.makeText(ProfileActivity.this, "Please enter Locality", Toast.LENGTH_SHORT).show();
                     else {
-                        address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
-                                edtlandmark.getText().toString() + ", " + addressassigned;
-                        location = addressassigned;
-                    }
-                    Toast.makeText(ProfileActivity.this, "Updating...", Toast.LENGTH_SHORT).show();
+                        // address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                        //      edtlandmark.getText().toString() + ", " + currentAddtv.getText().toString();
+                        if(addressassigned.equals("")) {
+                            address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                                    edtlandmark.getText().toString() + ", " + shippingAddress.getAddress().toString();
+                            LatLng ll=shippingAddress.getLatLng();
+                            latitude=ll.latitude;
+                            longitude=ll.longitude;
+                            location = shippingAddress.getAddress().toString();
 
-                    firebaseDatabase = FirebaseDatabase.getInstance();
-                    databaseReference = firebaseDatabase.getReference(city).child("Users").child(phoneno);
-                    databaseReference.child("userphone").setValue(phoneno);
-                    databaseReference.child("username").setValue(edtusername.getText().toString());
-                    databaseReference.child("useraddress").setValue(address);
-                    databaseReference.child("userlatitude").setValue(String.valueOf(latitude));
-                    databaseReference.child("userlongitude").setValue(String.valueOf(longitude));
-
-                    SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("phone", phoneno);
-                    if(latitude!=0)
-                        editor.putString("latitude",String.valueOf(latitude));
-                    if(longitude!=0)
-                        editor.putString("longitude",String.valueOf(longitude));
-                    editor.putString("address",address);
-                    editor.putString("roomnumber",edtroomnumber.getText().toString());
-                    editor.putString("hostelname",edthostelname.getText().toString());
-                    editor.putString("landmark",edtlandmark.getText().toString());
-                    editor.putString("location",location);
-                    editor.putString("name", edtusername.getText().toString());
-                    //editor.putString("address",address);
-                    editor.commit();
-
-                    //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
-                    //      .commit();
-
-                    Toast.makeText(ProfileActivity.this, "Updated Successfully !", Toast.LENGTH_SHORT).show();
-                    Bundle bundle = getIntent().getExtras();
-                    if (bundle != null) {
-                        String strgoback = bundle.getString("comeback");
-                        if(strgoback.equals("yes"))
-                        {Intent returnIntent = new Intent();
-                            returnIntent.putExtra("result","1");
-                            setResult(Activity.RESULT_OK,returnIntent);
                         }
-                        //databaseReference = firebaseDatabase.getReference("category").child(category);
+                        else {
+                            address = edtroomnumber.getText().toString() + ", " + edthostelname.getText().toString() + ", " +
+                                    edtlandmark.getText().toString() + ", " + addressassigned;
+                            location = addressassigned;
+                        }
+                        Toast.makeText(ProfileActivity.this, "Updating...", Toast.LENGTH_SHORT).show();
+
+                        firebaseDatabase = FirebaseDatabase.getInstance();
+                        databaseReference = firebaseDatabase.getReference(city).child("Users").child(phoneno);
+                        databaseReference.child("userphone").setValue(phoneno);
+                        databaseReference.child("username").setValue(edtusername.getText().toString());
+                        databaseReference.child("useraddress").setValue(address);
+                        databaseReference.child("userlatitude").setValue(String.valueOf(latitude));
+                        databaseReference.child("userlongitude").setValue(String.valueOf(longitude));
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("phone", phoneno);
+                        if(latitude!=0)
+                            editor.putString("latitude",String.valueOf(latitude));
+                        if(longitude!=0)
+                            editor.putString("longitude",String.valueOf(longitude));
+                        editor.putString("address",address);
+                        editor.putString("roomnumber",edtroomnumber.getText().toString());
+                        editor.putString("hostelname",edthostelname.getText().toString());
+                        editor.putString("landmark",edtlandmark.getText().toString());
+                        editor.putString("location",location);
+                        editor.putString("name", edtusername.getText().toString());
+                        //editor.putString("address",address);
+                        editor.commit();
+
+                        //getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
+                        //      .commit();
+
+                        Toast.makeText(ProfileActivity.this, "Updated Successfully !", Toast.LENGTH_SHORT).show();
+                        Bundle bundle = getIntent().getExtras();
+                        if (bundle != null) {
+                            String strgoback = bundle.getString("comeback");
+                            if(strgoback.equals("yes"))
+                            {Intent returnIntent = new Intent();
+                                returnIntent.putExtra("result","1");
+                                setResult(Activity.RESULT_OK,returnIntent);
+                            }
+                            //databaseReference = firebaseDatabase.getReference("category").child(category);
+                        }
                     }
                 }
+                else
+                    Toast.makeText(getBaseContext(), "No Internet Connection !", Toast.LENGTH_SHORT).show();
+
             }
         });
 
