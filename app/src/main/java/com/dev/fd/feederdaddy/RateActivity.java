@@ -256,7 +256,6 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
                 rating.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.getValue()!=null) {
 
                             if (dataSnapshot.child(phone).exists()) {
                                 flag = 1;
@@ -267,7 +266,6 @@ public class RateActivity extends AppCompatActivity implements RatingDialogListe
                                 flag = 0;
                                 updaterating();
                             }
-                        }
                     }
 
                     @Override

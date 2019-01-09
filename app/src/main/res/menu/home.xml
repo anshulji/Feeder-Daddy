@@ -15,7 +15,7 @@
     <item android:id="@+id/hotdeals"
 
         android:title="Hot Deals"
-        android:icon="@drawable/ic_restaurant_black_24dp">
+        android:icon="@drawable/hot_deals">
     </item>
     <item android:id="@+id/nightorders"
 

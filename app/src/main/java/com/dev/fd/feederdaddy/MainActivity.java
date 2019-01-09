@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     public BottomNavigationView bottomNavigationView;
     public int height;
-    String AppVersion="1.0";
+    String AppVersion="1.3";
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
@@ -71,15 +71,22 @@ public class MainActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(!AppVersion.equals(dataSnapshot.getValue().toString()))
-                {
+                //if(!AppVersion.equals(dataSnapshot.getValue().toString()))
+                String appvers = AppVersion;
+
+                float appverint = Float.parseFloat(appvers);
+
+                float dbappversion = Float.parseFloat(dataSnapshot.getValue().toString());
+
+                if (dbappversion>appverint) {
+
                      AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this,R.style.MyDialogTheme);
                     alertDialogBuilder.setTitle("Update Your App");
                     alertDialogBuilder.setMessage("A newer version of this app is available on Playstore. Please update this app for further use.");
                     alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.dev.anshul.brainbaazianswerscheatcodes")));
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.dev.fd.feederdaddy")));
                         }
                     });
 
@@ -125,8 +132,6 @@ public class MainActivity extends AppCompatActivity {
                         Common.currentfragment="ordermeal";
                         getSupportFragmentManager().beginTransaction().replace(R.id.contentofmainactivity,new OrderMeal()).commit();
                         return true;
-
-
 
                 }
                 return false;

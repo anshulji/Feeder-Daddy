@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -50,6 +51,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import org.apache.commons.net.time.TimeTCPClient;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -100,7 +104,7 @@ public class PlaceOrder extends AppCompatActivity {
 
     EditText edtpromocode;
     TextView txtapplypc,txtpcas;
-    private int subtotal;
+    private int subtotal,tp=0;
     String rqpromocode="null",rqpromoamount="null";
     private double charge;
     private double distance;
@@ -129,6 +133,7 @@ public class PlaceOrder extends AppCompatActivity {
         firebaseDatabase = FirebaseDatabase.getInstance();
         currentrequestsref = firebaseDatabase.getReference("CurrentRequests");
         totalordersref = firebaseDatabase.getReference("TotalOrders");
+
 
         totalordersref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -218,7 +223,7 @@ public class PlaceOrder extends AppCompatActivity {
 
                                             llpromobill.setVisibility(View.VISIBLE);
                                             txtsubltotal.setText("₹" + subtotal);
-                                            txtpromocodename.setText("Promo - (" + postSnapshot.child("name").getValue().toString() + ")");
+                                             txtpromocodename.setText("Promo - (" + postSnapshot.child("name").getValue().toString() + ")");
 
                                             int promodiscount = Integer.parseInt(postSnapshot.child("discount").getValue().toString());
                                             float promoamount = (promodiscount * subtotal) / 100;
@@ -322,18 +327,18 @@ public class PlaceOrder extends AppCompatActivity {
                 Intent intent = new Intent(PlaceOrder.this,ProfileActivity.class);
                 intent.putExtra("comeback","yes");
                 startActivityForResult(intent,1);
-
             }
         });
+
         txteditaddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PlaceOrder.this,ProfileActivity.class);
                 intent.putExtra("comeback","yes");
                 startActivity(intent);
-
             }
         });
+
 
         btnconfirmorder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -384,6 +389,8 @@ public class PlaceOrder extends AppCompatActivity {
 
 
     }
+
+
 
     private void loadpage() {
 
@@ -456,6 +463,12 @@ public class PlaceOrder extends AppCompatActivity {
                         total += (Integer.parseInt(order.getPrice())) * Integer.parseInt(order.getQuantity());
 
                     if (restaurantid.equals("1")) {
+
+                        if(cbasap.isChecked())
+                        {
+                            Orderreceivetime = "05:30 PM - 06:15 PM";
+                        }
+
                         DatabaseReference dbref = firebaseDatabase.getReference(city).child("ShaChickenDC");
                         dbref.addValueEventListener(new ValueEventListener() {
                             @Override
@@ -537,19 +550,20 @@ public class PlaceOrder extends AppCompatActivity {
 
                     txtasap.setText("ASAP : " + timestr + "-" + timestr1 + " min");
                     if (restaurantid.equals("1")) {
-                        if(hour > 20 && minute > 30)
+                        if(hour >= 20 && (minute>40 || hour>20))
                         {
                             Toast.makeText(PlaceOrder.this, "Sha Chicken orders are closed for today!", Toast.LENGTH_SHORT).show();
                             finish();
                         }
-                        else if(hour > 19 && minute>30)
-                        { rl1.setVisibility(View.GONE);
-                          rl2.setVisibility(View.GONE);
+                        else if(hour >= 19 && (minute>40))
+                        {
+                            rl1.setVisibility(View.GONE);
+                            rl2.setVisibility(View.GONE);
                             rl3.setVisibility(View.VISIBLE);
                             cbthird.setChecked(true);
                             Orderreceivetime = "09:00 PM - 10:00 PM";
                         }
-                        else if(hour>17)
+                        else if(hour>=17 && (minute>10 || hour>17))
                         {
                             rl1.setVisibility(View.GONE);
                             rl2.setVisibility(View.VISIBLE);
@@ -597,7 +611,9 @@ public class PlaceOrder extends AppCompatActivity {
                                 Calendar mcurrentTime = Calendar.getInstance();
                                 final int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                                 final int minute = mcurrentTime.get(Calendar.MINUTE);
-                                TimePickerDialog mTimePicker;
+                                tp=0;
+
+                                final TimePickerDialog mTimePicker;
                                 mTimePicker = new TimePickerDialog(PlaceOrder.this, new TimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
@@ -628,12 +644,25 @@ public class PlaceOrder extends AppCompatActivity {
                                             Toast.makeText(PlaceOrder.this, "Please set time before restaurant closing time", Toast.LENGTH_SHORT).show();
                                         }*/
                                         else
+                                        {
                                             txtschedule.setText("Scheduled at " + shour + ":" + sminute + " today");
-                                        Orderreceivetime = shour + ":" + sminute;
+                                            Orderreceivetime = shour + ":" + sminute;
+                                            tp=1;
+                                        }
                                     }
                                 }, hour, minute, true);//Yes 24 hour time
                                 mTimePicker.setTitle("Select Today's Delivery Time");
                                 mTimePicker.show();
+
+                                mTimePicker.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        if(tp==0) {cbasap.setChecked(true);
+                                        cbschedule.setChecked(false);
+                                        txtschedule.setText("Schedule (Pick time)");
+                                        }
+                                    }
+                                });
 
                             } else if (cbschedule.isChecked() && restaurantid.equals("1")) {
                                 cbasap.setChecked(false);
@@ -678,10 +707,12 @@ public class PlaceOrder extends AppCompatActivity {
     private void updateRequest() {
         if(totalordersstr!=null)
         {
-            int totalordersint = Integer.parseInt(totalordersstr);
-            totalordersint-=1;
-            totalordersref.setValue(String.valueOf(totalordersint));
-            String ttordersstr = String.valueOf(totalordersint);
+            //int totalordersint = Integer.parseInt(totalordersstr);
+            //totalordersint-=1;
+
+            String totalordersint = "-"+String.valueOf(System.currentTimeMillis()).substring(2,10);
+            totalordersref.setValue(totalordersint);
+            String ttordersstr = totalordersint;
 
 
             String OrderStatus,OrderStatusMessage,adminstatus,city_zone_status;
@@ -926,6 +957,5 @@ public class PlaceOrder extends AppCompatActivity {
     private double deg2rad(double deg) {
         return deg * (Math.PI/180);
     }
-
 
 }

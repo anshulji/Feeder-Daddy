@@ -282,7 +282,6 @@ public class SignUpActivity extends AppCompatActivity {
                     String verificationCode = edtverificationcode.getText().toString();
                     PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, verificationCode);
                     signInWithPhoneAuthCredential(credential);
-
                 }
             }
         });
@@ -375,13 +374,14 @@ public class SignUpActivity extends AppCompatActivity {
                         }
                         Toast.makeText(SignUpActivity.this, "Signing in...", Toast.LENGTH_SHORT).show();
 
-                        databaseReference = firebaseDatabase.getReference("Varanasi").child("Users").child(phoneno);
+                        databaseReference = firebaseDatabase.getReference(city).child("Users").child(phoneno);
                         databaseReference.child("userphone").setValue(phoneno);
                         databaseReference.child("username").setValue(username);
                         databaseReference.child("useraddress").setValue(address);
                         databaseReference.child("userlatitude").setValue(String.valueOf(latitude));
                         databaseReference.child("userlongitude").setValue(String.valueOf(longitude));
                         databaseReference.child("userzone").setValue(zone);
+                        databaseReference.child("usercity").setValue(city);
 
                         SharedPreferences sharedPreferences = getSharedPreferences("MyData", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -21,6 +21,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -38,12 +39,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FoodListActivity extends AppCompatActivity {
+
+    InputMethodManager imm;
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -234,6 +238,7 @@ public class FoodListActivity extends AppCompatActivity {
             text_count.setText(sct);
         }
 
+        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         materialSearchBar = findViewById(R.id.searchBar);
         materialSearchBar.setHint("Enter Food Name");
@@ -241,6 +246,7 @@ public class FoodListActivity extends AppCompatActivity {
 
         materialSearchBar.setLastSuggestions(SuggestList);
         materialSearchBar.setCardViewElevation(0);
+        materialSearchBar.hideSuggestionsList();
         materialSearchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -249,6 +255,9 @@ public class FoodListActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(charSequence.length()>0 && !materialSearchBar.isSuggestionsVisible() && imm.isActive())
+                    materialSearchBar.showSuggestionsList();
+
                 List<String> suggest = new ArrayList<>();
                 for(String search: SuggestList)
                 {
@@ -264,6 +273,26 @@ public class FoodListActivity extends AppCompatActivity {
 
             }
         });
+
+        materialSearchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+            @Override
+            public void OnItemClickListener(int position, View v) {
+
+                //startSearch(SuggestList.get(position));
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken() , 0);
+                startSearch(materialSearchBar.getLastSuggestions().get(position).toString());
+                materialSearchBar.setText(materialSearchBar.getLastSuggestions().get(position).toString());
+                materialSearchBar.hideSuggestionsList();
+            }
+
+            @Override
+            public void OnItemDeleteListener(int position, View v) {
+
+
+            }
+        });
+
+
         materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
             public void onSearchStateChanged(boolean enabled) {
@@ -356,7 +385,7 @@ public class FoodListActivity extends AppCompatActivity {
                         //start food details activity
                         Intent fooddetail = new Intent(FoodListActivity.this,FoodDetails.class);
                         fooddetail.putExtra("comeback","yes");
-                        fooddetail.putExtra("FoodId",adapter.getRef(position).getKey());
+                        fooddetail.putExtra("FoodId",searchAdapter.getRef(position).getKey());
                         fooddetail.putExtra("RestaurantId",RestaurantId);
                         fooddetail.putExtra("MenuId", MenuId);
                         startActivityForResult(fooddetail,1);

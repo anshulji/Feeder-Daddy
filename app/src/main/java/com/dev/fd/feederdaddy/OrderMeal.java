@@ -29,6 +29,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -44,6 +45,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
@@ -75,6 +77,7 @@ import java.util.List;
 
 public class OrderMeal extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
+    InputMethodManager imm=null;
 
     FirebaseDatabase database;
     DatabaseReference restaurant,refdelivercharges;
@@ -92,6 +95,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     RestaurantAdapter restaurantAdapter,searchAdapter ;
     List<String> SuggestList = new ArrayList<>();
     MaterialSearchBar materialSearchBar;
+    LottieAnimationView lottieAnimationView;
 
     ProgressBar progressBar;
 
@@ -253,16 +257,23 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
                                 loadSuggest();
 
+                                if(getActivity()!=null)
+                                imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
                                 materialSearchBar.setLastSuggestions(SuggestList);
                                 materialSearchBar.setCardViewElevation(0);
+                                materialSearchBar.hideSuggestionsList();
                                 materialSearchBar.addTextChangeListener(new TextWatcher() {
                                     @Override
                                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
                                     }
 
                                     @Override
                                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                        if(charSequence.length()>0 && !materialSearchBar.isSuggestionsVisible() && imm.isActive())
+                                            materialSearchBar.showSuggestionsList();
+
                                         List<String> suggest = new ArrayList<>();
                                         for (String search : SuggestList) {
                                             if (search.toLowerCase().contains(materialSearchBar.getText().toLowerCase())) {
@@ -274,7 +285,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
                                     @Override
                                     public void afterTextChanged(Editable editable) {
-
                                     }
                                 });
 
@@ -282,15 +292,17 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                                 materialSearchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
                                     @Override
                                     public void OnItemClickListener(int position, View v) {
-                                        startSearch(SuggestList.get(position));
-                                        materialSearchBar.hideSuggestionsList();
-                                        materialSearchBar.setText(SuggestList.get(position));
-                                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                                        //startSearch(SuggestList.get(position));
                                         imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                                        startSearch(materialSearchBar.getLastSuggestions().get(position).toString());
+                                        materialSearchBar.setText(materialSearchBar.getLastSuggestions().get(position).toString());
+                                        materialSearchBar.hideSuggestionsList();
                                     }
 
                                     @Override
                                     public void OnItemDeleteListener(int position, View v) {
+
 
                                     }
                                 });
@@ -310,6 +322,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                                         //when search finish
                                         //show result of search adapter
                                         startSearch(text);
+                                        materialSearchBar.hideSuggestionsList();
                                     }
 
                                     @Override
@@ -317,7 +330,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
 
                                     }
                                 });
-
 
                             }
 
@@ -421,6 +433,52 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
             sliderLayout.setVisibility(View.INVISIBLE);
             setupSlider();
 
+            lottieAnimationView = view.findViewById(R.id.orderstatusnotif);
+            lottieAnimationView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(),Orders.class);
+                    startActivity(intent);
+                }
+            });
+
+            DatabaseReference orderstatusref = database.getReference("CurrentRequests");
+            orderstatusref.orderByChild("customerphone").equalTo(Common.getPhone(getActivity().getBaseContext())).limitToFirst(1).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot!=null)
+                    {
+                        for(DataSnapshot postSnapshot : dataSnapshot.getChildren())
+                        {
+                            if(postSnapshot.child("orderstatus").getValue().toString().equals("1") ||
+                                    postSnapshot.child("orderstatus").getValue().toString().equals("-2") ||
+                                    postSnapshot.child("orderstatus").getValue().toString().equals("11") ||
+                                    postSnapshot.child("orderstatus").getValue().toString().equals("3") ||
+                                    postSnapshot.child("orderstatus").getValue().toString().equals("4")
+                                    )
+                            {
+                                lottieAnimationView.setVisibility(View.VISIBLE);
+                            }
+                            else
+                            {
+                                lottieAnimationView.setVisibility(View.GONE);
+                            }
+                            Log.e("mytag", postSnapshot.child("orderstatus").getValue().toString() );
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        lottieAnimationView.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
         }
         else
         {
@@ -470,7 +528,7 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                         TextSliderView textSliderView = new TextSliderView(getActivity());
                         textSliderView.description(nameoffood)
                                 .image(image_list.get(key))
-                                .setScaleType(BaseSliderView.ScaleType.CenterCrop);
+                                .setScaleType(BaseSliderView.ScaleType.Fit);
 
                         sliderLayout.addSlider(textSliderView);
 
@@ -592,9 +650,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
     }*/
 
     private void startSearch(CharSequence text) {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
 
         searchedList.clear();
         restaurant.orderByChild("name").equalTo(text.toString()).addValueEventListener(new ValueEventListener() {
@@ -610,10 +665,6 @@ public class OrderMeal extends Fragment implements NavigationView.OnNavigationIt
                     }
                     searchAdapter = new RestaurantAdapter(searchedList, OrderMeal.this.getActivity());
                     //recylermenu.setAdapter(searchAdapter);
-
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
 
                     recylermenu.setAdapter(searchAdapter);
                 }

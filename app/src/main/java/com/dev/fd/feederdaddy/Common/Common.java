@@ -79,4 +79,8 @@ public class Common {
         return date.toString();
     }
 
+    public static String getPhone(Context c){
+        SharedPreferences sharedPreferences = c.getSharedPreferences("MyData",Context.MODE_PRIVATE);
+        return sharedPreferences.getString("phone","N/A");
+    }
 }
